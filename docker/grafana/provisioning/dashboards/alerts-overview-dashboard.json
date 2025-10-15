@@ -1,0 +1,471 @@
+{
+  "id": null,
+  "uid": "alerts-overview",
+  "title": "🚨 アラート監視ダッシュボード",
+  "tags": ["alerts", "monitoring", "prometheus"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "id": 1,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "type": "row",
+      "title": "📊 アラート概要",
+      "collapsed": false
+    },
+    {
+      "id": 2,
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 1},
+      "type": "stat",
+      "title": "🔴 発火中のアラート",
+      "targets": [
+        {
+          "expr": "count(ALERTS{alertstate=\"firing\"})",
+          "legendFormat": "Firing Alerts",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "red", "value": 3}
+            ]
+          }
+        }
+      },
+      "options": {
+        "graphMode": "none",
+        "colorMode": "background",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 1},
+      "type": "stat",
+      "title": "🟡 保留中のアラート",
+      "targets": [
+        {
+          "expr": "count(ALERTS{alertstate=\"pending\"})",
+          "legendFormat": "Pending Alerts",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "orange", "value": 5}
+            ]
+          }
+        }
+      },
+      "options": {
+        "graphMode": "none",
+        "colorMode": "background",
+        "textMode": "value_and_name"
+      }
+    },
+    {
+      "id": 4,
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 1},
+      "type": "stat",
+      "title": "📋 総アラート数",
+      "targets": [
+        {
+          "expr": "count(ALERTS)",
+          "legendFormat": "Total Alerts",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "blue", "value": null}
+            ]
+          }
+        }
+      },
+      "options": {
+        "graphMode": "none",
+        "colorMode": "value",
+        "textMode": "value_and_name"
+      }
+    },
+    {
+      "id": 10,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 7},
+      "type": "row",
+      "title": "🔴 クリティカルアラート",
+      "collapsed": false
+    },
+    {
+      "id": 11,
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 8},
+      "type": "table",
+      "title": "クリティカルアラート一覧",
+      "targets": [
+        {
+          "expr": "ALERTS{severity=\"critical\"}",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "alertstate"},
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "firing": {"color": "red", "text": "🔴 FIRING"},
+                      "pending": {"color": "yellow", "text": "🟡 PENDING"},
+                      "inactive": {"color": "green", "text": "🟢 INACTIVE"}
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "Time"},
+            "properties": [
+              {"id": "custom.hidden", "value": true}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "__name__"},
+            "properties": [
+              {"id": "custom.hidden", "value": true}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "job"},
+            "properties": [
+              {"id": "custom.hidden", "value": true}
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "alertstate",
+            "desc": true
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "job": true
+            },
+            "indexByName": {
+              "alertname": 0,
+              "alertstate": 1,
+              "severity": 2,
+              "component": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 18},
+      "type": "row",
+      "title": "🟡 警告アラート",
+      "collapsed": false
+    },
+    {
+      "id": 21,
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 19},
+      "type": "table",
+      "title": "警告アラート一覧",
+      "targets": [
+        {
+          "expr": "ALERTS{severity=\"warning\"}",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "alertstate"},
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "firing": {"color": "red", "text": "🔴 FIRING"},
+                      "pending": {"color": "yellow", "text": "🟡 PENDING"},
+                      "inactive": {"color": "green", "text": "🟢 INACTIVE"}
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "Time"},
+            "properties": [
+              {"id": "custom.hidden", "value": true}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "__name__"},
+            "properties": [
+              {"id": "custom.hidden", "value": true}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "job"},
+            "properties": [
+              {"id": "custom.hidden", "value": true}
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "alertstate",
+            "desc": true
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "job": true
+            },
+            "indexByName": {
+              "alertname": 0,
+              "alertstate": 1,
+              "severity": 2,
+              "component": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 29},
+      "type": "row",
+      "title": "📈 アラート履歴",
+      "collapsed": false
+    },
+    {
+      "id": 31,
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 30},
+      "type": "timeseries",
+      "title": "アラート発火履歴",
+      "targets": [
+        {
+          "expr": "count by (alertname) (ALERTS{alertstate=\"firing\"})",
+          "legendFormat": "{{alertname}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "fillOpacity": 20,
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["last", "max"]
+        }
+      }
+    },
+    {
+      "id": 40,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 38},
+      "type": "row",
+      "title": "📊 メトリクス詳細",
+      "collapsed": false
+    },
+    {
+      "id": 41,
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 39},
+      "type": "timeseries",
+      "title": "ヒープメモリ使用率（閾値付き）",
+      "targets": [
+        {
+          "expr": "(jvm_memory_used_bytes{application=\"camel-observability-demo\",area=\"heap\"} / jvm_memory_max_bytes{application=\"camel-observability-demo\",area=\"heap\"}) * 100",
+          "legendFormat": "Heap Usage",
+          "refId": "A"
+        },
+        {
+          "expr": "70",
+          "legendFormat": "Warning Threshold (70%)",
+          "refId": "B"
+        },
+        {
+          "expr": "90",
+          "legendFormat": "Critical Threshold (90%)",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byRegexp", "options": ".*Threshold.*"},
+            "properties": [
+              {"id": "custom.lineStyle", "value": {"dash": [10, 10], "fill": "dash"}},
+              {"id": "custom.lineWidth", "value": 2},
+              {"id": "custom.fillOpacity", "value": 0}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "Warning Threshold (70%)"},
+            "properties": [
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "yellow"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "Critical Threshold (90%)"},
+            "properties": [
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 42,
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 39},
+      "type": "timeseries",
+      "title": "エラー率（閾値付き）",
+      "targets": [
+        {
+          "expr": "(rate(camel_exchanges_failed_total{application=\"camel-observability-demo\"}[5m]) / rate(camel_exchanges_total{application=\"camel-observability-demo\"}[5m])) * 100",
+          "legendFormat": "{{routeId}} Error Rate",
+          "refId": "A"
+        },
+        {
+          "expr": "10",
+          "legendFormat": "Critical Threshold (10%)",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byRegexp", "options": ".*Threshold.*"},
+            "properties": [
+              {"id": "custom.lineStyle", "value": {"dash": [10, 10], "fill": "dash"}},
+              {"id": "custom.lineWidth", "value": 2},
+              {"id": "custom.fillOpacity", "value": 0},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    }
+  ]
+}
+

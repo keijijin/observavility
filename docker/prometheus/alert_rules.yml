@@ -1,0 +1,146 @@
+groups:
+  - name: camel_application_alerts
+    interval: 30s
+    rules:
+      # ========================================
+      # クリティカルアラート（即座の対応が必要）
+      # ========================================
+      
+      - alert: HighMemoryUsage
+        expr: (jvm_memory_used_bytes{application="camel-observability-demo",area="heap"} / jvm_memory_max_bytes{application="camel-observability-demo",area="heap"}) > 0.9
+        for: 2m
+        labels:
+          severity: critical
+          component: jvm
+        annotations:
+          summary: "ヒープメモリ使用率が90%超え"
+          description: "アプリケーション {{ $labels.application }} のヒープメモリ使用率が {{ $value | humanizePercentage }} です。OOMのリスクがあります。"
+          
+      - alert: HighErrorRate
+        expr: (rate(camel_exchanges_failed_total{application="camel-observability-demo"}[5m]) / rate(camel_exchanges_total{application="camel-observability-demo"}[5m])) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          component: camel
+        annotations:
+          summary: "Camelルートのエラー率が10%超え"
+          description: "ルート {{ $labels.routeId }} のエラー率が {{ $value | humanizePercentage }} です。即座の調査が必要です。"
+          
+      - alert: HighHTTPErrorRate
+        expr: (rate(http_server_requests_seconds_count{application="camel-observability-demo",status=~"5.."}[5m]) / rate(http_server_requests_seconds_count{application="camel-observability-demo"}[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          component: http
+        annotations:
+          summary: "HTTP 5xxエラー率が5%超え"
+          description: "エンドポイント {{ $labels.uri }} の5xxエラー率が {{ $value | humanizePercentage }} です。サーバー側の問題があります。"
+          
+      - alert: HighGCOverhead
+        expr: jvm_gc_overhead_percent{application="camel-observability-demo"} > 20
+        for: 5m
+        labels:
+          severity: critical
+          component: jvm
+        annotations:
+          summary: "GCオーバーヘッドが20%超え"
+          description: "アプリケーション {{ $labels.application }} のGCオーバーヘッドが {{ $value }}% です。ヒープサイズの増加が必要です。"
+          
+      - alert: ApplicationDown
+        expr: up{job="camel-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: application
+        annotations:
+          summary: "アプリケーションがダウン"
+          description: "Camelアプリケーションに接続できません。アプリケーションが停止している可能性があります。"
+          
+      # ========================================
+      # 警告アラート（注意が必要）
+      # ========================================
+      
+      - alert: ModerateMemoryUsage
+        expr: (jvm_memory_used_bytes{application="camel-observability-demo",area="heap"} / jvm_memory_max_bytes{application="camel-observability-demo",area="heap"}) > 0.7
+        for: 5m
+        labels:
+          severity: warning
+          component: jvm
+        annotations:
+          summary: "ヒープメモリ使用率が70%超え"
+          description: "アプリケーション {{ $labels.application }} のヒープメモリ使用率が {{ $value | humanizePercentage }} です。監視を強化してください。"
+          
+      - alert: HighCPUUsage
+        expr: process_cpu_usage{application="camel-observability-demo"} > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "CPU使用率が80%超え"
+          description: "アプリケーション {{ $labels.application }} のCPU使用率が {{ $value | humanizePercentage }} です。"
+          
+      - alert: SlowResponseTime
+        expr: (rate(http_server_requests_seconds_sum{application="camel-observability-demo"}[5m]) / rate(http_server_requests_seconds_count{application="camel-observability-demo"}[5m])) > 1
+        for: 3m
+        labels:
+          severity: warning
+          component: http
+        annotations:
+          summary: "HTTPレスポンスタイムが1秒超え"
+          description: "エンドポイント {{ $labels.uri }} の平均レスポンスタイムが {{ $value }}秒 です。パフォーマンス劣化の可能性があります。"
+          
+      - alert: HighInflightMessages
+        expr: camel_exchanges_inflight{application="camel-observability-demo"} > 100
+        for: 3m
+        labels:
+          severity: warning
+          component: camel
+        annotations:
+          summary: "処理中メッセージ数が100超え"
+          description: "ルート {{ $labels.routeId }} の処理中メッセージが {{ $value }} 件です。バックプレッシャーが発生している可能性があります。"
+          
+      - alert: HighThreadCount
+        expr: jvm_threads_live_threads{application="camel-observability-demo"} > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: jvm
+        annotations:
+          summary: "アクティブスレッド数が100超え"
+          description: "アプリケーション {{ $labels.application }} のスレッド数が {{ $value }} です。スレッドリークの可能性があります。"
+          
+      - alert: ModerateGCOverhead
+        expr: jvm_gc_overhead_percent{application="camel-observability-demo"} > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: jvm
+        annotations:
+          summary: "GCオーバーヘッドが10%超え"
+          description: "アプリケーション {{ $labels.application }} のGCオーバーヘッドが {{ $value }}% です。メモリチューニングを検討してください。"
+          
+      # ========================================
+      # 情報アラート（参考情報）
+      # ========================================
+      
+      - alert: FrequentGarbageCollection
+        expr: rate(jvm_gc_pause_seconds_count{application="camel-observability-demo"}[1m]) * 60 > 30
+        for: 5m
+        labels:
+          severity: info
+          component: jvm
+        annotations:
+          summary: "GC実行頻度が高い（30回/分超え）"
+          description: "アプリケーション {{ $labels.application }} のGC実行頻度が {{ $value }}回/分 です。メモリ割り当てパターンを確認してください。"
+          
+      - alert: ApplicationRestarted
+        expr: changes(process_uptime_seconds{application="camel-observability-demo"}[5m]) > 0
+        for: 1m
+        labels:
+          severity: info
+          component: application
+        annotations:
+          summary: "アプリケーションが再起動されました"
+          description: "アプリケーション {{ $labels.application }} が再起動されました。意図的な再起動でない場合は調査が必要です。"
+
