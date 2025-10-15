@@ -1,0 +1,717 @@
+{
+  "id": null,
+  "uid": "camel-comprehensive",
+  "title": "Camel + Kafka + SpringBoot 分散アプリケーション ダッシュボード",
+  "tags": ["camel", "kafka", "springboot", "observability", "comprehensive"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "id": 1,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "type": "row",
+      "title": "📊 システム概要",
+      "collapsed": false
+    },
+    {
+      "id": 2,
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 1},
+      "type": "stat",
+      "title": "⏱️ アプリケーション稼働時間",
+      "targets": [
+        {
+          "expr": "process_uptime_seconds{application=\"camel-observability-demo\"}",
+          "legendFormat": "Uptime",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null}
+            ]
+          },
+          "mappings": []
+        }
+      },
+      "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 1},
+      "type": "gauge",
+      "title": "💻 CPU使用率",
+      "targets": [
+        {
+          "expr": "process_cpu_usage{application=\"camel-observability-demo\"} * 100",
+          "legendFormat": "CPU Usage",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 50},
+              {"color": "orange", "value": 70},
+              {"color": "red", "value": 85}
+            ]
+          }
+        }
+      },
+      "options": {
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 4,
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 1},
+      "type": "gauge",
+      "title": "🧠 ヒープメモリ使用率",
+      "targets": [
+        {
+          "expr": "(jvm_memory_used_bytes{application=\"camel-observability-demo\",area=\"heap\"} / jvm_memory_max_bytes{application=\"camel-observability-demo\",area=\"heap\"}) * 100",
+          "legendFormat": "Heap Usage",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 60},
+              {"color": "orange", "value": 80},
+              {"color": "red", "value": 90}
+            ]
+          }
+        }
+      },
+      "options": {
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 5,
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 1},
+      "type": "stat",
+      "title": "🧵 アクティブスレッド数",
+      "targets": [
+        {
+          "expr": "jvm_threads_live_threads{application=\"camel-observability-demo\"}",
+          "legendFormat": "Live Threads",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 50},
+              {"color": "orange", "value": 80},
+              {"color": "red", "value": 100}
+            ]
+          }
+        }
+      },
+      "options": {
+        "graphMode": "area",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 10,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 7},
+      "type": "row",
+      "title": "🐫 Camel ルート パフォーマンス",
+      "collapsed": false
+    },
+    {
+      "id": 11,
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 8},
+      "type": "timeseries",
+      "title": "📨 メッセージ処理レート",
+      "targets": [
+        {
+          "expr": "rate(camel_exchanges_total{application=\"camel-observability-demo\"}[1m])",
+          "legendFormat": "{{routeId}} - Total",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(camel_exchanges_succeeded_total{application=\"camel-observability-demo\"}[1m])",
+          "legendFormat": "{{routeId}} - Success",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(camel_exchanges_failed_total{application=\"camel-observability-demo\"}[1m])",
+          "legendFormat": "{{routeId}} - Failed",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byRegexp", "options": ".*Failed.*"},
+            "properties": [
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byRegexp", "options": ".*Success.*"},
+            "properties": [
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": ["last", "mean", "max"]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 8},
+      "type": "timeseries",
+      "title": "❌ エラー率",
+      "targets": [
+        {
+          "expr": "(rate(camel_exchanges_failed_total{application=\"camel-observability-demo\"}[1m]) / rate(camel_exchanges_total{application=\"camel-observability-demo\"}[1m])) * 100",
+          "legendFormat": "{{routeId}} - Error Rate",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 20
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "orange", "value": 5},
+              {"color": "red", "value": 10}
+            ]
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": ["last", "mean", "max"]
+        }
+      }
+    },
+    {
+      "id": 13,
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 8},
+      "type": "timeseries",
+      "title": "⏱️ 平均処理時間",
+      "targets": [
+        {
+          "expr": "rate(camel_route_policy_seconds_sum{application=\"camel-observability-demo\"}[1m]) / rate(camel_route_policy_seconds_count{application=\"camel-observability-demo\"}[1m])",
+          "legendFormat": "{{routeId}} - Avg Time",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": ["last", "mean", "max"]
+        }
+      }
+    },
+    {
+      "id": 14,
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+      "type": "timeseries",
+      "title": "📊 処理中メッセージ数（Inflight）",
+      "targets": [
+        {
+          "expr": "camel_exchanges_inflight{application=\"camel-observability-demo\"}",
+          "legendFormat": "{{routeId}} - Inflight",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 20
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 50},
+              {"color": "orange", "value": 100},
+              {"color": "red", "value": 200}
+            ]
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": ["last", "mean", "max"]
+        }
+      }
+    },
+    {
+      "id": 15,
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+      "type": "stat",
+      "title": "🚦 実行中ルート数",
+      "targets": [
+        {
+          "expr": "camel_routes_running_routes{application=\"camel-observability-demo\"}",
+          "legendFormat": "Running Routes",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null}
+            ]
+          }
+        }
+      },
+      "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "textMode": "value_and_name"
+      }
+    },
+    {
+      "id": 30,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 24},
+      "type": "row",
+      "title": "🌐 HTTP エンドポイント",
+      "collapsed": false
+    },
+    {
+      "id": 31,
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 25},
+      "type": "timeseries",
+      "title": "📡 HTTPリクエストレート（エンドポイント別）",
+      "targets": [
+        {
+          "expr": "sum by (uri) (rate(http_server_requests_seconds_count{application=\"camel-observability-demo\"}[1m]))",
+          "legendFormat": "{{uri}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["last", "mean", "max"]
+        }
+      }
+    },
+    {
+      "id": 32,
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 25},
+      "type": "timeseries",
+      "title": "⏰ HTTPレスポンスタイム",
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_sum{application=\"camel-observability-demo\"}[1m]) / rate(http_server_requests_seconds_count{application=\"camel-observability-demo\"}[1m])",
+          "legendFormat": "{{uri}} - Avg",
+          "refId": "A"
+        },
+        {
+          "expr": "http_server_requests_seconds_max{application=\"camel-observability-demo\"}",
+          "legendFormat": "{{uri}} - Max",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["last", "mean", "max"]
+        }
+      }
+    },
+    {
+      "id": 33,
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 33},
+      "type": "timeseries",
+      "title": "🚨 HTTPステータスコード別レート",
+      "targets": [
+        {
+          "expr": "sum by (status) (rate(http_server_requests_seconds_count{application=\"camel-observability-demo\"}[1m]))",
+          "legendFormat": "Status {{status}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byRegexp", "options": ".*5.*"},
+            "properties": [
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byRegexp", "options": ".*4.*"},
+            "properties": [
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "orange"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byRegexp", "options": ".*2.*"},
+            "properties": [
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["last", "mean", "max"]
+        }
+      }
+    },
+    {
+      "id": 40,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 41},
+      "type": "row",
+      "title": "🧠 JVM メモリ詳細",
+      "collapsed": false
+    },
+    {
+      "id": 41,
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 42},
+      "type": "timeseries",
+      "title": "💾 ヒープメモリ使用量推移",
+      "targets": [
+        {
+          "expr": "jvm_memory_used_bytes{application=\"camel-observability-demo\",area=\"heap\"}",
+          "legendFormat": "Used - {{id}}",
+          "refId": "A"
+        },
+        {
+          "expr": "jvm_memory_committed_bytes{application=\"camel-observability-demo\",area=\"heap\"}",
+          "legendFormat": "Committed - {{id}}",
+          "refId": "B"
+        },
+        {
+          "expr": "jvm_memory_max_bytes{application=\"camel-observability-demo\",area=\"heap\"}",
+          "legendFormat": "Max - {{id}}",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["last", "mean", "max"]
+        }
+      }
+    },
+    {
+      "id": 42,
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 42},
+      "type": "timeseries",
+      "title": "🗑️ ガベージコレクション",
+      "targets": [
+        {
+          "expr": "rate(jvm_gc_pause_seconds_count{application=\"camel-observability-demo\"}[1m]) * 60",
+          "legendFormat": "{{action}} - {{cause}} (count/min)",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(jvm_gc_pause_seconds_sum{application=\"camel-observability-demo\"}[1m]) / rate(jvm_gc_pause_seconds_count{application=\"camel-observability-demo\"}[1m])",
+          "legendFormat": "{{action}} - Avg Time (s)",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["last", "mean", "max"]
+        }
+      }
+    },
+    {
+      "id": 43,
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 50},
+      "type": "timeseries",
+      "title": "📦 メモリ割り当てレート",
+      "targets": [
+        {
+          "expr": "rate(jvm_gc_memory_allocated_bytes_total{application=\"camel-observability-demo\"}[1m])",
+          "legendFormat": "Allocated Rate",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(jvm_gc_memory_promoted_bytes_total{application=\"camel-observability-demo\"}[1m])",
+          "legendFormat": "Promoted Rate",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": ["last", "mean", "max"]
+        }
+      }
+    },
+    {
+      "id": 44,
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 50},
+      "type": "gauge",
+      "title": "⚠️ GCオーバーヘッド率",
+      "targets": [
+        {
+          "expr": "jvm_gc_overhead_percent{application=\"camel-observability-demo\"}",
+          "legendFormat": "GC Overhead",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 5},
+              {"color": "orange", "value": 10},
+              {"color": "red", "value": 20}
+            ]
+          }
+        }
+      },
+      "options": {
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 50,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 58},
+      "type": "row",
+      "title": "📊 メッセージフロー全体",
+      "collapsed": false
+    },
+    {
+      "id": 51,
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 59},
+      "type": "timeseries",
+      "title": "🔄 エンドツーエンド メッセージフロー",
+      "description": "HTTP → Camel → Kafka → Camel処理の全体的な流れ",
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_count{application=\"camel-observability-demo\",uri=\"/camel/api/orders\"}[1m])",
+          "legendFormat": "1. HTTP POST /api/orders",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(camel_exchanges_total{application=\"camel-observability-demo\",routeId=\"order-producer-route\"}[1m])",
+          "legendFormat": "2. Camel Producer → Kafka",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(camel_exchanges_total{application=\"camel-observability-demo\",routeId=\"order-consumer-route\"}[1m])",
+          "legendFormat": "3. Kafka → Camel Consumer",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(camel_exchanges_succeeded_total{application=\"camel-observability-demo\",routeId=\"order-consumer-route\"}[1m])",
+          "legendFormat": "4. Processing Success",
+          "refId": "D"
+        },
+        {
+          "expr": "rate(camel_exchanges_failed_total{application=\"camel-observability-demo\",routeId=\"order-consumer-route\"}[1m])",
+          "legendFormat": "5. Processing Failed",
+          "refId": "E"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 15
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "1. HTTP POST /api/orders"},
+            "properties": [
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "4. Processing Success"},
+            "properties": [
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "5. Processing Failed"},
+            "properties": [
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": ["last", "mean", "max", "sum"]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    }
+  ]
+}
+

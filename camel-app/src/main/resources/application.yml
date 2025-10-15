@@ -1,0 +1,74 @@
+spring:
+  application:
+    name: camel-observability-demo
+
+server:
+  port: 8080
+
+# Camel設定
+camel:
+  springboot:
+    name: camel-observability-demo
+  servlet:
+    mapping:
+      context-path: /camel/*
+  component:
+    kafka:
+      brokers: localhost:9092
+      auto-offset-reset: earliest
+      group-id: camel-demo-group
+    servlet:
+      mapping:
+        context-path: /camel/*
+  # Camel OpenTelemetry設定
+  opentelemetry:
+    enabled: true
+    endpoint: http://localhost:4318/v1/traces
+    service-name: ${spring.application.name}
+
+# Spring Boot Actuator設定
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+  # Spring Boot 3.x Tracing設定
+  tracing:
+    sampling:
+      probability: 1.0
+    # MDC（Mapped Diagnostic Context）にトレースIDを含める
+    baggage:
+      correlation:
+        enabled: true
+      remote-fields:
+        - trace_id
+        - span_id
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
+
+# ログ設定
+logging:
+  level:
+    root: INFO
+    com.example.demo: DEBUG
+    org.apache.camel: INFO
+    io.micrometer: INFO
+    io.opentelemetry: INFO
+    io.opentelemetry.context: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] - %msg%n"
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
