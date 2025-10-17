@@ -45,3 +45,11 @@ nb-configuration.xml
 .certs/
 
 logs/*.log
+
+# Log files - added to prevent large file errors
+*.log
+logs/
+**/logs/
+app.log
+camel-app-startup.log
+camel-app.log
