@@ -54,10 +54,11 @@ public class OrderProducerRoute extends RouteBuilder {
             .setBody(constant("Order created successfully"));
 
         // 定期的にオーダーを自動生成（デモ用）
-        from("timer:order-generator?period=10000&delay=5000")
-            .routeId("auto-order-generator")
-            .log("=== 自動オーダー生成タイマー起動 ===")
-            .to("direct:createOrder");
+        // Note: タイマーは無効化しています。REST APIで手動テストしてください。
+        // from("timer:order-generator?period=10000&delay=5000")
+        //     .routeId("auto-order-generator")
+        //     .log("=== 自動オーダー生成タイマー起動 ===")
+        //     .to("direct:createOrder");
     }
 }
 

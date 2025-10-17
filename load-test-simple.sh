@@ -89,3 +89,4 @@ echo "  2. Prometheus (http://localhost:9090) でクエリを実行"
 echo "  3. Camelアプリのログを確認: tail -f camel-app/app.log"
 echo ""
 
+

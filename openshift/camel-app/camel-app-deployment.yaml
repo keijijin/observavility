@@ -1,0 +1,194 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: camel-app-config
+data:
+  application.yml: |
+    spring:
+      application:
+        name: camel-observability-demo
+      kafka:
+        bootstrap-servers: kafka:9092
+        producer:
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.apache.kafka.common.serialization.StringSerializer
+        consumer:
+          group-id: camel-demo-group
+          auto-offset-reset: earliest
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      info:
+        app:
+          name: ${spring.application.name}
+          description: Apache Camel 4 Observability Demo
+          version: 1.0.0
+        camel:
+          version: 4.8.0
+        spring-boot:
+          version: 3.2.0
+
+    server:
+      port: 8080
+
+    camel:
+      springboot:
+        name: camel-observability-demo
+      servlet:
+        mapping:
+          context-path: /camel/*
+      component:
+        kafka:
+          brokers: kafka:9092
+          auto-offset-reset: earliest
+          group-id: camel-demo-group
+        servlet:
+          mapping:
+            context-path: /camel/*
+      opentelemetry:
+        enabled: true
+        endpoint: http://tempo:4318/v1/traces
+        service-name: ${spring.application.name}
+
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,info,prometheus,metrics
+          base-path: /actuator
+      endpoint:
+        health:
+          show-details: always
+        prometheus:
+          enabled: true
+      metrics:
+        export:
+          prometheus:
+            enabled: true
+        tags:
+          application: ${spring.application.name}
+      info:
+        env:
+          enabled: true
+        java:
+          enabled: true
+        os:
+          enabled: true
+      tracing:
+        sampling:
+          probability: 1.0
+        baggage:
+          correlation:
+            enabled: true
+          remote-fields:
+            - trace_id
+            - span_id
+      otlp:
+        endpoint: http://tempo:4318
+        tracing:
+          endpoint: http://tempo:4318/v1/traces
+
+    logging:
+      level:
+        root: INFO
+        com.example.demo: DEBUG
+        org.apache.camel: INFO
+        io.micrometer: INFO
+        io.opentelemetry: INFO
+        io.opentelemetry.context: WARN
+      pattern:
+        console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] - %msg%n"
+        level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: camel-app
+  labels:
+    app: camel-app
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  selector:
+    app: camel-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camel-app
+  labels:
+    app: camel-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: camel-app
+  template:
+    metadata:
+      labels:
+        app: camel-app
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+        - name: camel-app
+          # このイメージは事前にビルドしてレジストリにプッシュする必要があります
+          # 詳細は OPENSHIFT_DEPLOYMENT_GUIDE.md を参照
+          image: image-registry.openshift-image-registry.svc:5000/camel-observability-demo/camel-app:1.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: SPRING_CONFIG_LOCATION
+              value: file:/config/application.yml
+            - name: LOKI_URL
+              value: http://loki:3100/loki/api/v1/push
+          volumeMounts:
+            - name: camel-app-config
+              mountPath: /config
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1000m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+      volumes:
+        - name: camel-app-config
+          configMap:
+            name: camel-app-config
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: camel-app
+spec:
+  to:
+    kind: Service
+    name: camel-app
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+

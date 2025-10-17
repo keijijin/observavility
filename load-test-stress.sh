@@ -160,3 +160,4 @@ echo "   - tail -f demo/camel-app/app.log"
 echo "   - エラーログやボトルネックを確認"
 echo ""
 
+

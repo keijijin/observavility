@@ -384,3 +384,4 @@ echo "{app=\"camel-observability-demo\"} | json | trace_id=\"$TRACE_ID\""
 
 これで、Lokiクエリのよくある間違いとその修正方法が理解できました！🚀
 
+

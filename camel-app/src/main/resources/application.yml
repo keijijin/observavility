@@ -1,6 +1,16 @@
 spring:
   application:
     name: camel-observability-demo
+  # アプリケーション情報
+  info:
+    app:
+      name: ${spring.application.name}
+      description: Apache Camel 4 Observability Demo
+      version: 1.0.0
+    camel:
+      version: 4.8.0
+    spring-boot:
+      version: 3.2.0
 
 server:
   port: 8080

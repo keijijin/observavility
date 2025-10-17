@@ -144,3 +144,4 @@ groups:
           summary: "アプリケーションが再起動されました"
           description: "アプリケーション {{ $labels.application }} が再起動されました。意図的な再起動でない場合は調査が必要です。"
 
+

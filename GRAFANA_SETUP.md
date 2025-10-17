@@ -193,3 +193,4 @@ process_files_open_files{application="camel-observability-demo"}
 - [Prometheus Query Examples](https://prometheus.io/docs/prometheus/latest/querying/examples/)
 - [Micrometer Metrics](https://micrometer.io/docs/concepts)
 
+

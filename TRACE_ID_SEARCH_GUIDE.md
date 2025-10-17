@@ -477,3 +477,4 @@ sum by (trace_id) (count_over_time({app="camel-observability-demo"} | json | lev
 
 これで、トレースとログを完全に連携させて、問題の根本原因を素早く特定できます！🚀
 
+

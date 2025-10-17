@@ -413,3 +413,4 @@ http_server_requests_seconds_count{application="camel-observability-demo"}
 
 実際にクエリを実行して、オブザーバビリティを体験してください。
 
+

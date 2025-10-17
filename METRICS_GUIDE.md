@@ -310,3 +310,4 @@ camel_exchanges_inflight > 100
 このガイドに基づいて、包括的なGrafanaダッシュボードを作成しました：
 👉 **[camel-comprehensive-dashboard.json](docker/grafana/provisioning/dashboards/camel-comprehensive-dashboard.json)**
 
+

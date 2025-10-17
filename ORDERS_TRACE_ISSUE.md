@@ -353,3 +353,4 @@ grep "処理時間:" camel-app-startup.log | tail -10
 
 この問題は、Camel 4.xとOpenTelemetryの統合における既知の制限です。完全に解決するには、Camel 4.9以降へのアップグレードを検討してください。
 
+

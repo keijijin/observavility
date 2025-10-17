@@ -1,0 +1,158 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  labels:
+    app: kafka
+spec:
+  ports:
+    - name: kafka
+      port: 9092
+      targetPort: 9092
+  selector:
+    app: kafka
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka
+  labels:
+    app: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      # OpenShiftがセキュリティコンテキストを自動設定
+      containers:
+        - name: kafka
+          # Apache Kafka公式イメージ（OpenShift対応版）
+          image: quay.io/strimzi/kafka:0.38.0-kafka-3.6.0
+          command:
+            - sh
+            - -c
+            - |
+              # KRaftモードでKafkaを起動
+              export KAFKA_CLUSTER_ID="MkU3OEVBNTcwNTJENDM2Qk"
+              
+              # ディレクトリの準備
+              mkdir -p /var/lib/kafka/data
+              
+              # lost+foundディレクトリを削除（PVCで自動作成されるが、Kafkaと互換性がない）
+              rm -rf /var/lib/kafka/data/lost+found
+              
+              # KRaftモード用にストレージをフォーマット（初回のみ）
+              if [ ! -f /var/lib/kafka/data/meta.properties ]; then
+                /opt/kafka/bin/kafka-storage.sh format \
+                  -t $KAFKA_CLUSTER_ID \
+                  -c /tmp/kraft-combined-config.properties
+              fi
+              
+              # Kafkaサーバーを起動
+              exec /opt/kafka/bin/kafka-server-start.sh /tmp/kraft-combined-config.properties
+          ports:
+            - containerPort: 9092
+              name: kafka
+            - containerPort: 9093
+              name: controller
+          env:
+            - name: KAFKA_CLUSTER_ID
+              value: "MkU3OEVBNTcwNTJENDM2Qk"
+            - name: KAFKA_HEAP_OPTS
+              value: "-Xmx1g -Xms512m"
+            - name: LOG_DIR
+              value: "/var/lib/kafka/data"
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+          volumeMounts:
+            - name: kafka-data
+              mountPath: /var/lib/kafka/data
+            - name: config
+              mountPath: /tmp
+          readinessProbe:
+            tcpSocket:
+              port: 9092
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: 9092
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: kafka-data
+          persistentVolumeClaim:
+            claimName: kafka-data
+        - name: config
+          configMap:
+            name: kafka-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-config
+data:
+  kraft-combined-config.properties: |
+    # KRaftモード設定
+    process.roles=broker,controller
+    node.id=1
+    controller.quorum.voters=1@localhost:9093
+    
+    # リスナー設定
+    listeners=PLAINTEXT://:9092,CONTROLLER://:9093
+    advertised.listeners=PLAINTEXT://kafka:9092
+    listener.security.protocol.map=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+    controller.listener.names=CONTROLLER
+    inter.broker.listener.name=PLAINTEXT
+    
+    # ログディレクトリ
+    log.dirs=/var/lib/kafka/data
+    
+    # レプリケーション設定（シングルノード）
+    offsets.topic.replication.factor=1
+    transaction.state.log.replication.factor=1
+    transaction.state.log.min.isr=1
+    default.replication.factor=1
+    min.insync.replicas=1
+    
+    # 自動トピック作成
+    auto.create.topics.enable=true
+    
+    # パフォーマンス設定
+    num.network.threads=3
+    num.io.threads=8
+    socket.send.buffer.bytes=102400
+    socket.receive.buffer.bytes=102400
+    socket.request.max.bytes=104857600
+    
+    # ログ保持設定
+    log.retention.hours=168
+    log.segment.bytes=1073741824
+    log.retention.check.interval.ms=300000
+

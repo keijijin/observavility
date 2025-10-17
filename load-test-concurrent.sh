@@ -185,3 +185,4 @@ echo "🗺️ Tempoでトレースを確認:"
 echo "   Grafana → Explore → Tempo"
 echo ""
 
+
