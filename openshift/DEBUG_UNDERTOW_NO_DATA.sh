@@ -96,7 +96,19 @@ echo ""
 # 8. Grafana API経由でdatasource確認
 echo "8. Grafana API経由でdatasource確認:"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-oc exec "$GRAFANA_POD" -- wget -qO- --header="Authorization: Basic YWRtaW46YWRtaW4xMjM=" "http://localhost:3000/api/datasources" 2>/dev/null | python3 -m json.tool 2>/dev/null || echo -e "${YELLOW}⚠ API呼び出しに失敗${NC}"
+
+# Grafana認証情報をシークレットから取得
+GRAFANA_USER=$(oc get secret grafana-admin-credentials -o jsonpath='{.data.GF_SECURITY_ADMIN_USER}' 2>/dev/null | base64 -d 2>/dev/null || echo "admin")
+GRAFANA_PASS=$(oc get secret grafana-admin-credentials -o jsonpath='{.data.GF_SECURITY_ADMIN_PASSWORD}' 2>/dev/null | base64 -d 2>/dev/null || echo "admin")
+
+if [ -z "$GRAFANA_USER" ] || [ -z "$GRAFANA_PASS" ]; then
+    echo -e "${YELLOW}⚠ Grafana認証情報がシークレットから取得できません。デフォルト値を使用します。${NC}"
+    GRAFANA_USER="admin"
+    GRAFANA_PASS="admin"
+fi
+
+GRAFANA_AUTH=$(echo -n "$GRAFANA_USER:$GRAFANA_PASS" | base64)
+oc exec "$GRAFANA_POD" -- wget -qO- --header="Authorization: Basic $GRAFANA_AUTH" "http://localhost:3000/api/datasources" 2>/dev/null | python3 -m json.tool 2>/dev/null || echo -e "${YELLOW}⚠ API呼び出しに失敗${NC}"
 echo ""
 
 # 9. ConfigMap内のdashboard設定確認
