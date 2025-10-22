@@ -311,3 +311,4 @@ camel_exchanges_inflight > 100
 👉 **[camel-comprehensive-dashboard.json](docker/grafana/provisioning/dashboards/camel-comprehensive-dashboard.json)**
 
 
+

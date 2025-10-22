@@ -131,3 +131,4 @@ brew install python3
 
 修正が完了しました！🎉
 
+

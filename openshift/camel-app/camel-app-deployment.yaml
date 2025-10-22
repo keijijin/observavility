@@ -3,6 +3,49 @@ kind: ConfigMap
 metadata:
   name: camel-app-config
 data:
+  logback.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration>
+      <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+      <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+      
+      <!-- Loki appender for direct log shipping -->
+      <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <http>
+          <url>${LOKI_URL}</url>
+        </http>
+        <format>
+          <label>
+            <pattern>application=${spring.application.name},host=${HOSTNAME},level=%level</pattern>
+          </label>
+          <message>
+            <pattern>
+              {
+                "level":"%level",
+                "class":"%logger{36}",
+                "thread":"%thread",
+                "message":"%message",
+                "trace_id":"%X{traceId:-}",
+                "span_id":"%X{spanId:-}"
+              }
+            </pattern>
+          </message>
+        </format>
+      </appender>
+      
+      <!-- Root logger: Console + Loki only (no file logging for OpenShift) -->
+      <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="LOKI"/>
+      </root>
+      
+      <!-- Application-specific logging -->
+      <logger name="com.example.demo" level="DEBUG"/>
+      <logger name="org.apache.camel" level="INFO"/>
+      <logger name="io.micrometer" level="INFO"/>
+      <logger name="io.opentelemetry" level="INFO"/>
+      <logger name="io.opentelemetry.context" level="WARN"/>
+    </configuration>
   application.yml: |
     spring:
       application:
@@ -29,6 +72,13 @@ data:
 
     server:
       port: 8080
+      # Undertow 設定
+      undertow:
+        threads:
+          io: 4                    # I/Oスレッド数（通常はCPUコア数）
+          worker: 200              # ワーカースレッド数（最大）
+        buffer-size: 1024          # バッファサイズ（バイト）
+        direct-buffers: true       # ダイレクトバッファを使用
 
     camel:
       springboot:
@@ -66,6 +116,9 @@ data:
             enabled: true
         tags:
           application: ${spring.application.name}
+        # Undertowメトリクスを有効化
+        enable:
+          undertow: true
       info:
         env:
           enabled: true
@@ -88,6 +141,7 @@ data:
           endpoint: http://tempo:4318/v1/traces
 
     logging:
+      config: file:/config/logback.xml
       level:
         root: INFO
         com.example.demo: DEBUG
@@ -137,7 +191,7 @@ spec:
         - name: camel-app
           # このイメージは事前にビルドしてレジストリにプッシュする必要があります
           # 詳細は OPENSHIFT_DEPLOYMENT_GUIDE.md を参照
-          image: image-registry.openshift-image-registry.svc:5000/camel-observability-demo/camel-app:1.0.0
+          image: image-registry.openshift-image-registry.svc:5000/camel-observability-demo/camel-app:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
@@ -147,6 +201,12 @@ spec:
               value: file:/config/application.yml
             - name: LOKI_URL
               value: http://loki:3100/loki/api/v1/push
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://tempo:4318
+            - name: OTEL_SERVICE_NAME
+              value: camel-observability-demo
+            - name: OTEL_TRACES_EXPORTER
+              value: otlp
           volumeMounts:
             - name: camel-app-config
               mountPath: /config

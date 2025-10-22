@@ -104,9 +104,12 @@ print_success "現在のプロジェクト: $CURRENT_PROJECT"
 print_header "2. Pod状態の確認"
 
 # camel-app Podの確認
-CAMEL_POD=$(oc get pods -l deployment=camel-app -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+CAMEL_POD=$(oc get pods -l app=camel-app -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
 if [ -z "$CAMEL_POD" ]; then
     print_error "camel-app Podが見つかりません。"
+    echo ""
+    echo "利用可能なPod一覧:"
+    oc get pods
     exit 1
 fi
 print_success "camel-app Pod: $CAMEL_POD"

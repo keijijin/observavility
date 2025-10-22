@@ -90,3 +90,4 @@ echo "  3. Camelアプリのログを確認: tail -f camel-app/app.log"
 echo ""
 
 
+

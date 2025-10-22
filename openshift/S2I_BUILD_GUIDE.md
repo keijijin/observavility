@@ -330,3 +330,4 @@ oc set volume bc/camel-app --add --type=persistentVolumeClaim \
 **S2Iを使えば、Podmanの問題を完全に回避できます！**🚀
 
 
+

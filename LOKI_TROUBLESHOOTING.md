@@ -1,17 +1,48 @@
 # Lokiログ集約 - トラブルシューティングガイド
 
-## 🎉 解決済み: Lokiでログが表示されない問題
+## 📖 概要
 
 このドキュメントは、Lokiでログが表示されない問題の診断と解決方法を記録しています。
 
 ---
 
-## 📋 問題の症状
+## 🚀 クイックスタート: 接続テスト
 
-GrafanaのExploreで「Loki」データソースを選択してクエリを実行しても、ログが表示されませんでした。
+まず、Loki接続テストスクリプトを実行して問題を診断します：
+
+```bash
+cd demo
+./test-loki-connection.sh
+```
+
+このスクリプトは以下を自動的にチェックします：
+- Lokiサービスの稼働状態
+- Lokiへのログ送信テスト
+- ログクエリの実行テスト
+- Camelアプリケーションのログ確認
+
+---
+
+## 📋 よくある問題の症状
+
+### 症状1: "No data" が表示される
+
+GrafanaのExploreで「Loki」データソースを選択してクエリを実行しても、ログが表示されない。
 
 ```
 No data
+```
+
+### 症状2: ログファイルは生成されているがLokiで見えない
+
+アプリケーションのログファイル（`logs/application.log`）は生成されているが、Grafanaで検索できない。
+
+### 症状3: "Connection refused" エラー
+
+アプリケーションログに以下のエラーが表示される：
+
+```
+Failed to send log batch to Loki: Connection refused
 ```
 
 ---
@@ -89,10 +120,12 @@ No data
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <springProperty scope="context" name="appName" source="spring.application.name"/>
+
     <!-- Loki Appender -->
     <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
         <http>
-            <url>http://localhost:3100/loki/api/v1/push</url>
+            <url>${LOKI_URL:-http://localhost:3100/loki/api/v1/push}</url>
         </http>
         <format>
             <label>
@@ -105,8 +138,8 @@ No data
                       "class":"%logger{36}",
                       "thread":"%thread",
                       "message": "%message",
-                      "trace_id":"%X{trace_id:-}",
-                      "span_id":"%X{span_id:-}"
+                      "trace_id":"%mdc{traceId}",
+                      "span_id":"%mdc{spanId}"
                     }
                 </pattern>
             </message>
@@ -125,22 +158,42 @@ No data
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="ASYNC_LOKI"/>
+        <appender-ref ref="JSON_FILE"/>
+        <appender-ref ref="TEXT_FILE"/>
     </root>
 </configuration>
 ```
 
 **重要なポイント:**
+- **LOKI_URL**: 環境変数で上書き可能（デフォルト: `http://localhost:3100/loki/api/v1/push`）
 - **ラベル**: `app`, `host`, `level` を設定（Grafanaでのフィルタリングに使用）
 - **メッセージ**: JSON形式で構造化ログ
-- **trace_id/span_id**: トレースとログの連携
+- **trace_id/span_id**: MDC（Mapped Diagnostic Context）経由でトレースとログを連携
 - **非同期**: パフォーマンスへの影響を最小化
+- **ファイル出力**: Lokiへの送信失敗時のバックアップとして、JSON/テキスト形式でもファイルに出力
 
-### ステップ3: アプリケーションを再起動
+### ステップ3: アプリケーションを起動
+
+**方法1: 専用スクリプトを使用（推奨）**
 
 ```bash
 cd camel-app
-mvn clean package -DskipTests
-mvn spring-boot:run
+./run-local.sh
+```
+
+このスクリプトは以下を自動的に実行します：
+- ログディレクトリの作成
+- 環境変数（LOG_PATH, LOKI_URL）の設定
+- アプリケーションのビルドと起動
+
+**方法2: 手動起動**
+
+```bash
+cd camel-app
+mkdir -p logs
+export LOG_PATH="$(pwd)/logs"
+export LOKI_URL="http://localhost:3100/loki/api/v1/push"
+mvn clean spring-boot:run
 ```
 
 ---
@@ -332,35 +385,150 @@ curl -s "http://localhost:3100/loki/api/v1/labels" | jq '.data | length'
 **症状:**
 - Grafanaで`{app="camel-observability-demo"}`を実行しても何も表示されない
 
-**解決:**
-1. **時間範囲を確認**: 右上の時間範囲を「Last 15 minutes」などに設定
-2. **ラベル名を確認**: `curl -s "http://localhost:3100/loki/api/v1/label/app/values" | jq '.'`
-3. **ログが送信されているか確認**: アプリケーションにリクエストを送る
-4. **Grafanaのデータソースを確認**: Loki URL が`http://loki:3100`（コンテナ内）
+**原因:**
+1. Lokiにログが送信されていない
+2. Grafanaのデータソース設定が正しくない
+3. 時間範囲が適切でない
+4. ラベル名が間違っている
+
+**解決策:**
+
+**ステップ1: 接続テストスクリプトを実行**
+```bash
+cd demo
+./test-loki-connection.sh
+```
+
+**ステップ2: 時間範囲を確認**
+- Grafanaの右上の時間範囲を「Last 15 minutes」または「Last 1 hour」に設定
+
+**ステップ3: ラベル名を確認**
+```bash
+# 利用可能なラベルを確認
+curl -s "http://localhost:3100/loki/api/v1/labels" | jq '.'
+
+# appラベルの値を確認
+curl -s "http://localhost:3100/loki/api/v1/label/app/values" | jq '.'
+```
+
+**ステップ4: ログを生成**
+```bash
+# テストリクエストを送信してログを生成
+curl -X POST http://localhost:8080/camel/api/orders \
+  -H "Content-Type: application/json" \
+  -d '{"orderId":"TEST-001","product":"Test","quantity":1}'
+```
+
+**ステップ5: Grafanaのデータソースを確認**
+- URL: `http://loki:3100`（コンテナ内からのアクセス）
+- Access: `Server (default)` または `Proxy`
+
+**ステップ6: Grafanaとデータソースを再起動**
+```bash
+cd demo
+podman-compose restart grafana loki
+```
 
 ### 問題2: "Connection refused"
 
 **症状:**
+アプリケーションログに以下のエラーが表示される：
 ```
 Failed to send log batch to Loki
+java.net.ConnectException: Connection refused
 ```
 
-**解決:**
-- Lokiが起動しているか確認
-- `application.yml`または`logback-spring.xml`のLoki URLを確認
-- Podmanのネットワーク設定を確認: `host.containers.internal`を使用
+**原因:**
+1. Lokiサービスが起動していない
+2. Loki URLが間違っている
+3. ファイアウォールがポートをブロックしている
+
+**解決策:**
+
+**ステップ1: Lokiの状態を確認**
+```bash
+# Lokiコンテナが起動しているか確認
+podman ps | grep loki
+
+# Lokiが起動していない場合
+cd demo
+podman-compose up -d loki
+```
+
+**ステップ2: Lokiのヘルスチェック**
+```bash
+curl http://localhost:3100/ready
+# 期待される応答: "ready" または HTTP 200
+```
+
+**ステップ3: Loki URLを確認**
+
+ローカル実行の場合、`logback-spring.xml`のLoki URLは：
+```xml
+<url>${LOKI_URL:-http://localhost:3100/loki/api/v1/push}</url>
+```
+
+環境変数で設定することも可能：
+```bash
+export LOKI_URL="http://localhost:3100/loki/api/v1/push"
+```
+
+**ステップ4: ネットワーク接続をテスト**
+```bash
+# Lokiへの接続をテスト
+curl -X POST http://localhost:3100/loki/api/v1/push \
+  -H "Content-Type: application/json" \
+  -d '{"streams":[{"stream":{"app":"test"},"values":[["'$(date +%s%N)'","test message"]]}]}'
+
+# 期待される応答: HTTP 204 No Content
+```
 
 ### 問題3: ログは送信されているがGrafanaに表示されない
 
 **症状:**
-- `curl`ではログが見えるがGrafanaでは見えない
+- `curl`ではログが取得できるが、Grafanaでは "No data" が表示される
+- 接続テストスクリプトではログが見つかる
 
-**解決:**
-- Grafanaのデータソース設定を確認:
-  - URL: `http://loki:3100`（コンテナ間通信）
-  - または`http://localhost:3100`（ホストから）
-- Grafanaを再起動: `podman restart grafana`
-- ブラウザのキャッシュをクリア
+**原因:**
+1. Grafanaのデータソース設定が正しくない
+2. Grafanaのデータソースキャッシュが古い
+3. ブラウザキャッシュの問題
+
+**解決策:**
+
+**ステップ1: データソース設定を確認**
+
+Grafanaの設定ファイル（`docker/grafana/provisioning/datasources/datasources.yml`）を確認：
+```yaml
+- name: Loki
+  type: loki
+  access: proxy
+  uid: loki
+  url: http://loki:3100
+  editable: true
+```
+
+**ステップ2: Grafanaでデータソースをテスト**
+1. Grafana管理画面: http://localhost:3000
+2. メニュー → Configuration → Data sources
+3. Loki を選択
+4. 下部の「Test」ボタンをクリック
+5. "Data source is working" が表示されることを確認
+
+**ステップ3: Grafanaを再起動**
+```bash
+cd demo
+podman-compose restart grafana
+
+# または完全に再作成
+podman-compose stop grafana
+podman-compose rm -f grafana
+podman-compose up -d grafana
+```
+
+**ステップ4: ブラウザキャッシュをクリア**
+- ハードリロード: Ctrl+Shift+R（Windows/Linux）または Cmd+Shift+R（Mac）
+- または別のブラウザで試す
 
 ### 問題4: "Error parsing labels"
 
@@ -392,7 +560,7 @@ Error parsing labels: invalid label format
 
 Promtailを使用したい場合の設定例:
 
-### docker-compose.ymlに追加
+### docker-compose.yml（podman-compose用）に追加
 
 ```yaml
 promtail:
@@ -442,15 +610,50 @@ scrape_configs:
 
 ## ✅ チェックリスト
 
-デプロイ前に以下を確認:
+### デプロイ前の確認
 
 - [ ] `pom.xml`にLoki appender依存関係が含まれている
 - [ ] `logback-spring.xml`にLoki appenderが設定されている
 - [ ] ラベル設定が正しい（`app`, `host`, `level`）
 - [ ] Lokiコンテナが起動している
 - [ ] ネットワーク接続が確立されている
-- [ ] Grafanaのデータソース設定が正しい
+- [ ] Grafanaのデータソース設定が正しい（uid: loki）
 - [ ] 時間範囲が適切に設定されている
+- [ ] ログディレクトリが存在する（`logs/`）
+
+### トラブルシューティング時の確認
+
+1. **接続テストを実行**
+```bash
+cd demo
+./test-loki-connection.sh
+```
+
+2. **Lokiの状態確認**
+```bash
+podman ps | grep loki
+curl http://localhost:3100/ready
+```
+
+3. **ログファイルの確認**
+```bash
+# ローカルログファイルが生成されているか
+ls -lh demo/camel-app/logs/
+
+# 最新のログを確認
+tail -f demo/camel-app/logs/application.log
+```
+
+4. **Loki4jのログを確認**
+```bash
+# アプリケーションログからLoki関連のエラーを検索
+grep -i "loki4j" demo/camel-app/logs/application.log
+```
+
+5. **Grafanaで確認**
+- データソースのテストが成功するか
+- 時間範囲が適切か（Last 15 minutes など）
+- クエリ構文が正しいか
 
 ---
 
@@ -458,12 +661,62 @@ scrape_configs:
 
 以下が確認できれば成功です：
 
-1. ✅ アプリケーションが正常に起動
-2. ✅ Lokiにラベルが存在（`app`, `host`, `level`）
-3. ✅ `curl`でログデータが取得できる
-4. ✅ GrafanaでLokiからログを検索・表示できる
-5. ✅ JSON形式のログが正しくパースされる
-6. ✅ トレースIDでログとトレースが連携できる
+### 1. ✅ ローカルログファイルの生成
+```bash
+ls -lh demo/camel-app/logs/
+# 期待: application.log と application.json が存在
+```
+
+### 2. ✅ Lokiへの接続成功
+```bash
+cd demo
+./test-loki-connection.sh
+# すべてのチェックが✅で完了
+```
+
+### 3. ✅ Lokiにラベルが存在
+```bash
+curl -s "http://localhost:3100/loki/api/v1/labels" | jq '.'
+# "app", "host", "level" が含まれる
+```
+
+### 4. ✅ ログデータが取得できる
+```bash
+curl -s "http://localhost:3100/loki/api/v1/label/app/values" | jq '.'
+# "camel-observability-demo" が含まれる
+```
+
+### 5. ✅ Grafanaでログが表示される
+- Grafana Explore: http://localhost:3000/explore
+- データソース: Loki
+- クエリ: `{app="camel-observability-demo"}`
+- ログエントリが時系列で表示される
+
+### 6. ✅ JSON形式のログが正しくパースされる
+```logql
+{app="camel-observability-demo"} | json
+```
+- `level`, `class`, `thread`, `message`, `trace_id`, `span_id` フィールドが表示される
+
+### 7. ✅ トレースIDでログとトレースが連携できる
+- Grafana Explore でログを表示
+- trace_id をクリック
+- Tempoのトレース詳細画面に遷移
+
+---
+
+## 📈 パフォーマンスの確認
+
+正常に動作している場合の期待値：
+
+- **ログ送信レイテンシ**: < 100ms
+- **Grafanaクエリ応答時間**: < 2秒
+- **アプリケーションへの影響**: 最小限（非同期送信のため）
+
+```bash
+# Lokiのメトリクスを確認
+curl -s http://localhost:3100/metrics | grep loki_ingester
+```
 
 ---
 
@@ -473,9 +726,71 @@ scrape_configs:
 - [Loki4j GitHub](https://github.com/loki4j/loki-logback-appender)
 - [LogQL クエリ言語](https://grafana.com/docs/loki/latest/logql/)
 - [Grafana Explore](https://grafana.com/docs/grafana/latest/explore/)
+- [ログ設定ガイド](LOGGING_GUIDE.md) - ローカルログファイルの設定と確認方法
+
+---
+
+## 📝 まとめ
+
+### 問題の主な原因
+
+1. **ログファイルが見えない**
+   - ログディレクトリが作成されていない
+   - ログパスが相対パスで、実行ディレクトリに依存していた
+   - 解決: `LOG_PATH` 環境変数で制御可能に変更
+
+2. **Grafana Lokiでログが見えない**
+   - Lokiにログが送信されていない
+   - Grafanaのデータソース設定に uid が設定されていなかった
+   - Lokiの設定制限が厳しすぎた
+   - 解決: データソース設定の改善、Loki設定の緩和
+
+### 改善された点
+
+✅ **ログファイル出力**
+- プレーンテキスト形式: `logs/application.log`（読みやすい）
+- JSON形式: `logs/application.json`（分析用）
+- 日次ローテーション（7日間保持）
+
+✅ **Loki統合**
+- 環境変数でLoki URLを設定可能
+- MDC経由でトレースIDを自動連携
+- 非同期送信でパフォーマンス影響を最小化
+
+✅ **トラブルシューティングツール**
+- `run-local.sh`: アプリケーション起動スクリプト
+- `test-loki-connection.sh`: Loki接続テストスクリプト
+- 詳細なドキュメント
+
+### クイックリファレンス
+
+**アプリケーション起動:**
+```bash
+cd demo/camel-app
+./run-local.sh
+```
+
+**Loki接続テスト:**
+```bash
+cd demo
+./test-loki-connection.sh
+```
+
+**ログファイル確認:**
+```bash
+tail -f demo/camel-app/logs/application.log
+```
+
+**Grafanaでログ検索:**
+```logql
+{app="camel-observability-demo"}
+{app="camel-observability-demo"} |= "ERROR"
+{app="camel-observability-demo"} | json | trace_id="YOUR_TRACE_ID"
+```
 
 ---
 
 このガイドを使って、Lokiでログを正常に収集・表示できます！🚀
+
 
 

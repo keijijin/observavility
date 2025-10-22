@@ -1,0 +1,66 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# OpenShift deployment files
+openshift/
+
+# Documentation
+*.md
+!README.md
+
+# Docker
+docker/
+docker-compose.yml
+Dockerfile
+
+# Logs (IMPORTANT: These can be very large)
+*.log
+logs/
+app.log
+*.log.*
+thread_monitor*.log
+rps_monitor*.log
+load_test*.log
+stress_test*.log
+
+# Test scripts
+*.sh
+!camel-app/src/**/*.sh
+
+# Maven (but keep the JAR)
+**/target/
+!**/target/*.jar
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Node modules (if any)
+node_modules/
+
+# Python (if any)
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+
+

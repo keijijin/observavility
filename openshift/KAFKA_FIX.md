@@ -291,3 +291,4 @@ oc logs -f deployment/camel-app
 **これでKafkaが正常に動作するはずです！** 🎉
 
 
+

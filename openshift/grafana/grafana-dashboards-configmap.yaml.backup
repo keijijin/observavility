@@ -1,0 +1,525 @@
+apiVersion: v1
+data:
+  alerts-overview-dashboard.json: "{\n  \"id\": null,\n  \"uid\": \"alerts-overview\",\n
+    \ \"title\": \"\U0001F6A8 アラート監視ダッシュボード\",\n  \"tags\": [\"alerts\", \"monitoring\",
+    \"prometheus\"],\n  \"timezone\": \"browser\",\n  \"schemaVersion\": 38,\n  \"version\":
+    1,\n  \"refresh\": \"10s\",\n  \"panels\": [\n    {\n      \"id\": 1,\n      \"gridPos\":
+    {\"h\": 1, \"w\": 24, \"x\": 0, \"y\": 0},\n      \"type\": \"row\",\n      \"title\":
+    \"\U0001F4CA アラート概要\",\n      \"collapsed\": false\n    },\n    {\n      \"id\":
+    2,\n      \"gridPos\": {\"h\": 6, \"w\": 8, \"x\": 0, \"y\": 1},\n      \"type\":
+    \"stat\",\n      \"title\": \"\U0001F534 発火中のアラート\",\n      \"targets\": [\n        {\n
+    \         \"expr\": \"count(ALERTS{alertstate=\\\"firing\\\"})\",\n          \"legendFormat\":
+    \"Firing Alerts\",\n          \"refId\": \"A\"\n        }\n      ],\n      \"fieldConfig\":
+    {\n        \"defaults\": {\n          \"unit\": \"short\",\n          \"decimals\":
+    0,\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n            \"steps\":
+    [\n              {\"color\": \"green\", \"value\": null},\n              {\"color\":
+    \"yellow\", \"value\": 1},\n              {\"color\": \"red\", \"value\": 3}\n
+    \           ]\n          }\n        }\n      },\n      \"options\": {\n        \"graphMode\":
+    \"none\",\n        \"colorMode\": \"background\",\n        \"textMode\": \"value_and_name\",\n
+    \       \"reduceOptions\": {\n          \"values\": false,\n          \"calcs\":
+    [\"lastNotNull\"]\n        }\n      }\n    },\n    {\n      \"id\": 3,\n      \"gridPos\":
+    {\"h\": 6, \"w\": 8, \"x\": 8, \"y\": 1},\n      \"type\": \"stat\",\n      \"title\":
+    \"\U0001F7E1 保留中のアラート\",\n      \"targets\": [\n        {\n          \"expr\":
+    \"count(ALERTS{alertstate=\\\"pending\\\"})\",\n          \"legendFormat\": \"Pending
+    Alerts\",\n          \"refId\": \"A\"\n        }\n      ],\n      \"fieldConfig\":
+    {\n        \"defaults\": {\n          \"unit\": \"short\",\n          \"decimals\":
+    0,\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n            \"steps\":
+    [\n              {\"color\": \"green\", \"value\": null},\n              {\"color\":
+    \"yellow\", \"value\": 1},\n              {\"color\": \"orange\", \"value\": 5}\n
+    \           ]\n          }\n        }\n      },\n      \"options\": {\n        \"graphMode\":
+    \"none\",\n        \"colorMode\": \"background\",\n        \"textMode\": \"value_and_name\"\n
+    \     }\n    },\n    {\n      \"id\": 4,\n      \"gridPos\": {\"h\": 6, \"w\":
+    8, \"x\": 16, \"y\": 1},\n      \"type\": \"stat\",\n      \"title\": \"\U0001F4CB
+    総アラート数\",\n      \"targets\": [\n        {\n          \"expr\": \"count(ALERTS)\",\n
+    \         \"legendFormat\": \"Total Alerts\",\n          \"refId\": \"A\"\n        }\n
+    \     ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"short\",\n          \"decimals\": 0,\n          \"thresholds\": {\n            \"mode\":
+    \"absolute\",\n            \"steps\": [\n              {\"color\": \"blue\", \"value\":
+    null}\n            ]\n          }\n        }\n      },\n      \"options\": {\n
+    \       \"graphMode\": \"none\",\n        \"colorMode\": \"value\",\n        \"textMode\":
+    \"value_and_name\"\n      }\n    },\n    {\n      \"id\": 10,\n      \"gridPos\":
+    {\"h\": 1, \"w\": 24, \"x\": 0, \"y\": 7},\n      \"type\": \"row\",\n      \"title\":
+    \"\U0001F534 クリティカルアラート\",\n      \"collapsed\": false\n    },\n    {\n      \"id\":
+    11,\n      \"gridPos\": {\"h\": 10, \"w\": 24, \"x\": 0, \"y\": 8},\n      \"type\":
+    \"table\",\n      \"title\": \"クリティカルアラート一覧\",\n      \"targets\": [\n        {\n
+    \         \"expr\": \"ALERTS{severity=\\\"critical\\\"}\",\n          \"format\":
+    \"table\",\n          \"instant\": true,\n          \"refId\": \"A\"\n        }\n
+    \     ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"custom\":
+    {\n            \"align\": \"auto\",\n            \"displayMode\": \"auto\"\n          }\n
+    \       },\n        \"overrides\": [\n          {\n            \"matcher\": {\"id\":
+    \"byName\", \"options\": \"alertstate\"},\n            \"properties\": [\n              {\n
+    \               \"id\": \"custom.displayMode\",\n                \"value\": \"color-background\"\n
+    \             },\n              {\n                \"id\": \"mappings\",\n                \"value\":
+    [\n                  {\n                    \"type\": \"value\",\n                    \"options\":
+    {\n                      \"firing\": {\"color\": \"red\", \"text\": \"\U0001F534
+    FIRING\"},\n                      \"pending\": {\"color\": \"yellow\", \"text\":
+    \"\U0001F7E1 PENDING\"},\n                      \"inactive\": {\"color\": \"green\",
+    \"text\": \"\U0001F7E2 INACTIVE\"}\n                    }\n                  }\n
+    \               ]\n              }\n            ]\n          },\n          {\n
+    \           \"matcher\": {\"id\": \"byName\", \"options\": \"Time\"},\n            \"properties\":
+    [\n              {\"id\": \"custom.hidden\", \"value\": true}\n            ]\n
+    \         },\n          {\n            \"matcher\": {\"id\": \"byName\", \"options\":
+    \"__name__\"},\n            \"properties\": [\n              {\"id\": \"custom.hidden\",
+    \"value\": true}\n            ]\n          },\n          {\n            \"matcher\":
+    {\"id\": \"byName\", \"options\": \"job\"},\n            \"properties\": [\n              {\"id\":
+    \"custom.hidden\", \"value\": true}\n            ]\n          }\n        ]\n      },\n
+    \     \"options\": {\n        \"showHeader\": true,\n        \"sortBy\": [\n          {\n
+    \           \"displayName\": \"alertstate\",\n            \"desc\": true\n          }\n
+    \       ]\n      },\n      \"transformations\": [\n        {\n          \"id\":
+    \"organize\",\n          \"options\": {\n            \"excludeByName\": {\n              \"Time\":
+    true,\n              \"__name__\": true,\n              \"job\": true\n            },\n
+    \           \"indexByName\": {\n              \"alertname\": 0,\n              \"alertstate\":
+    1,\n              \"severity\": 2,\n              \"component\": 3\n            }\n
+    \         }\n        }\n      ]\n    },\n    {\n      \"id\": 20,\n      \"gridPos\":
+    {\"h\": 1, \"w\": 24, \"x\": 0, \"y\": 18},\n      \"type\": \"row\",\n      \"title\":
+    \"\U0001F7E1 警告アラート\",\n      \"collapsed\": false\n    },\n    {\n      \"id\":
+    21,\n      \"gridPos\": {\"h\": 10, \"w\": 24, \"x\": 0, \"y\": 19},\n      \"type\":
+    \"table\",\n      \"title\": \"警告アラート一覧\",\n      \"targets\": [\n        {\n
+    \         \"expr\": \"ALERTS{severity=\\\"warning\\\"}\",\n          \"format\":
+    \"table\",\n          \"instant\": true,\n          \"refId\": \"A\"\n        }\n
+    \     ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"custom\":
+    {\n            \"align\": \"auto\",\n            \"displayMode\": \"auto\"\n          }\n
+    \       },\n        \"overrides\": [\n          {\n            \"matcher\": {\"id\":
+    \"byName\", \"options\": \"alertstate\"},\n            \"properties\": [\n              {\n
+    \               \"id\": \"custom.displayMode\",\n                \"value\": \"color-background\"\n
+    \             },\n              {\n                \"id\": \"mappings\",\n                \"value\":
+    [\n                  {\n                    \"type\": \"value\",\n                    \"options\":
+    {\n                      \"firing\": {\"color\": \"red\", \"text\": \"\U0001F534
+    FIRING\"},\n                      \"pending\": {\"color\": \"yellow\", \"text\":
+    \"\U0001F7E1 PENDING\"},\n                      \"inactive\": {\"color\": \"green\",
+    \"text\": \"\U0001F7E2 INACTIVE\"}\n                    }\n                  }\n
+    \               ]\n              }\n            ]\n          },\n          {\n
+    \           \"matcher\": {\"id\": \"byName\", \"options\": \"Time\"},\n            \"properties\":
+    [\n              {\"id\": \"custom.hidden\", \"value\": true}\n            ]\n
+    \         },\n          {\n            \"matcher\": {\"id\": \"byName\", \"options\":
+    \"__name__\"},\n            \"properties\": [\n              {\"id\": \"custom.hidden\",
+    \"value\": true}\n            ]\n          },\n          {\n            \"matcher\":
+    {\"id\": \"byName\", \"options\": \"job\"},\n            \"properties\": [\n              {\"id\":
+    \"custom.hidden\", \"value\": true}\n            ]\n          }\n        ]\n      },\n
+    \     \"options\": {\n        \"showHeader\": true,\n        \"sortBy\": [\n          {\n
+    \           \"displayName\": \"alertstate\",\n            \"desc\": true\n          }\n
+    \       ]\n      },\n      \"transformations\": [\n        {\n          \"id\":
+    \"organize\",\n          \"options\": {\n            \"excludeByName\": {\n              \"Time\":
+    true,\n              \"__name__\": true,\n              \"job\": true\n            },\n
+    \           \"indexByName\": {\n              \"alertname\": 0,\n              \"alertstate\":
+    1,\n              \"severity\": 2,\n              \"component\": 3\n            }\n
+    \         }\n        }\n      ]\n    },\n    {\n      \"id\": 30,\n      \"gridPos\":
+    {\"h\": 1, \"w\": 24, \"x\": 0, \"y\": 29},\n      \"type\": \"row\",\n      \"title\":
+    \"\U0001F4C8 アラート履歴\",\n      \"collapsed\": false\n    },\n    {\n      \"id\":
+    31,\n      \"gridPos\": {\"h\": 8, \"w\": 24, \"x\": 0, \"y\": 30},\n      \"type\":
+    \"timeseries\",\n      \"title\": \"アラート発火履歴\",\n      \"targets\": [\n        {\n
+    \         \"expr\": \"count by (alertname) (ALERTS{alertstate=\\\"firing\\\"})\",\n
+    \         \"legendFormat\": \"{{alertname}}\",\n          \"refId\": \"A\"\n        }\n
+    \     ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"short\",\n          \"custom\": {\n            \"drawStyle\": \"line\",\n            \"lineInterpolation\":
+    \"stepAfter\",\n            \"lineWidth\": 2,\n            \"fillOpacity\": 20,\n
+    \           \"stacking\": {\n              \"mode\": \"normal\"\n            }\n
+    \         }\n        }\n      },\n      \"options\": {\n        \"legend\": {\n
+    \         \"displayMode\": \"table\",\n          \"placement\": \"right\",\n          \"calcs\":
+    [\"last\", \"max\"]\n        }\n      }\n    },\n    {\n      \"id\": 40,\n      \"gridPos\":
+    {\"h\": 1, \"w\": 24, \"x\": 0, \"y\": 38},\n      \"type\": \"row\",\n      \"title\":
+    \"\U0001F4CA メトリクス詳細\",\n      \"collapsed\": false\n    },\n    {\n      \"id\":
+    41,\n      \"gridPos\": {\"h\": 8, \"w\": 12, \"x\": 0, \"y\": 39},\n      \"type\":
+    \"timeseries\",\n      \"title\": \"ヒープメモリ使用率（閾値付き）\",\n      \"targets\": [\n
+    \       {\n          \"expr\": \"(jvm_memory_used_bytes{application=\\\"camel-observability-demo\\\",area=\\\"heap\\\"}
+    / jvm_memory_max_bytes{application=\\\"camel-observability-demo\\\",area=\\\"heap\\\"})
+    * 100\",\n          \"legendFormat\": \"Heap Usage\",\n          \"refId\": \"A\"\n
+    \       },\n        {\n          \"expr\": \"70\",\n          \"legendFormat\":
+    \"Warning Threshold (70%)\",\n          \"refId\": \"B\"\n        },\n        {\n
+    \         \"expr\": \"90\",\n          \"legendFormat\": \"Critical Threshold
+    (90%)\",\n          \"refId\": \"C\"\n        }\n      ],\n      \"fieldConfig\":
+    {\n        \"defaults\": {\n          \"unit\": \"percent\",\n          \"min\":
+    0,\n          \"max\": 100,\n          \"custom\": {\n            \"drawStyle\":
+    \"line\",\n            \"lineInterpolation\": \"smooth\",\n            \"fillOpacity\":
+    10\n          }\n        },\n        \"overrides\": [\n          {\n            \"matcher\":
+    {\"id\": \"byRegexp\", \"options\": \".*Threshold.*\"},\n            \"properties\":
+    [\n              {\"id\": \"custom.lineStyle\", \"value\": {\"dash\": [10, 10],
+    \"fill\": \"dash\"}},\n              {\"id\": \"custom.lineWidth\", \"value\":
+    2},\n              {\"id\": \"custom.fillOpacity\", \"value\": 0}\n            ]\n
+    \         },\n          {\n            \"matcher\": {\"id\": \"byName\", \"options\":
+    \"Warning Threshold (70%)\"},\n            \"properties\": [\n              {\"id\":
+    \"color\", \"value\": {\"mode\": \"fixed\", \"fixedColor\": \"yellow\"}}\n            ]\n
+    \         },\n          {\n            \"matcher\": {\"id\": \"byName\", \"options\":
+    \"Critical Threshold (90%)\"},\n            \"properties\": [\n              {\"id\":
+    \"color\", \"value\": {\"mode\": \"fixed\", \"fixedColor\": \"red\"}}\n            ]\n
+    \         }\n        ]\n      },\n      \"options\": {\n        \"legend\": {\n
+    \         \"displayMode\": \"table\",\n          \"placement\": \"bottom\"\n        }\n
+    \     }\n    },\n    {\n      \"id\": 42,\n      \"gridPos\": {\"h\": 8, \"w\":
+    12, \"x\": 12, \"y\": 39},\n      \"type\": \"timeseries\",\n      \"title\":
+    \"エラー率（閾値付き）\",\n      \"targets\": [\n        {\n          \"expr\": \"(rate(camel_exchanges_failed_total{application=\\\"camel-observability-demo\\\"}[5m])
+    / rate(camel_exchanges_total{application=\\\"camel-observability-demo\\\"}[5m]))
+    * 100\",\n          \"legendFormat\": \"{{routeId}} Error Rate\",\n          \"refId\":
+    \"A\"\n        },\n        {\n          \"expr\": \"10\",\n          \"legendFormat\":
+    \"Critical Threshold (10%)\",\n          \"refId\": \"B\"\n        }\n      ],\n
+    \     \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"percent\",\n
+    \         \"min\": 0,\n          \"custom\": {\n            \"drawStyle\": \"line\",\n
+    \           \"lineInterpolation\": \"smooth\",\n            \"fillOpacity\": 10\n
+    \         }\n        },\n        \"overrides\": [\n          {\n            \"matcher\":
+    {\"id\": \"byRegexp\", \"options\": \".*Threshold.*\"},\n            \"properties\":
+    [\n              {\"id\": \"custom.lineStyle\", \"value\": {\"dash\": [10, 10],
+    \"fill\": \"dash\"}},\n              {\"id\": \"custom.lineWidth\", \"value\":
+    2},\n              {\"id\": \"custom.fillOpacity\", \"value\": 0},\n              {\"id\":
+    \"color\", \"value\": {\"mode\": \"fixed\", \"fixedColor\": \"red\"}}\n            ]\n
+    \         }\n        ]\n      },\n      \"options\": {\n        \"legend\": {\n
+    \         \"displayMode\": \"table\",\n          \"placement\": \"bottom\"\n        }\n
+    \     }\n    }\n  ]\n}\n\n"
+  camel-comprehensive-dashboard.json: "{\n  \"id\": null,\n  \"uid\": \"camel-comprehensive\",\n
+    \ \"title\": \"Camel + Kafka + SpringBoot 分散アプリケーション ダッシュボード\",\n  \"tags\": [\"camel\",
+    \"kafka\", \"springboot\", \"observability\", \"comprehensive\"],\n  \"timezone\":
+    \"browser\",\n  \"schemaVersion\": 38,\n  \"version\": 1,\n  \"refresh\": \"5s\",\n
+    \ \"panels\": [\n    {\n      \"id\": 1,\n      \"gridPos\": {\"h\": 1, \"w\":
+    24, \"x\": 0, \"y\": 0},\n      \"type\": \"row\",\n      \"title\": \"\U0001F4CA
+    システム概要\",\n      \"collapsed\": false\n    },\n    {\n      \"id\": 2,\n      \"gridPos\":
+    {\"h\": 6, \"w\": 6, \"x\": 0, \"y\": 1},\n      \"type\": \"stat\",\n      \"title\":
+    \"⏱️ アプリケーション稼働時間\",\n      \"targets\": [\n        {\n          \"expr\": \"process_uptime_seconds{application=\\\"camel-observability-demo\\\"}\",\n
+    \         \"legendFormat\": \"Uptime\",\n          \"refId\": \"A\"\n        }\n
+    \     ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"s\",\n          \"decimals\": 0,\n          \"thresholds\": {\n            \"mode\":
+    \"absolute\",\n            \"steps\": [\n              {\"color\": \"green\",
+    \"value\": null}\n            ]\n          },\n          \"mappings\": []\n        }\n
+    \     },\n      \"options\": {\n        \"graphMode\": \"area\",\n        \"colorMode\":
+    \"value\",\n        \"justifyMode\": \"auto\",\n        \"textMode\": \"auto\",\n
+    \       \"reduceOptions\": {\n          \"values\": false,\n          \"calcs\":
+    [\"lastNotNull\"]\n        }\n      }\n    },\n    {\n      \"id\": 3,\n      \"gridPos\":
+    {\"h\": 6, \"w\": 6, \"x\": 6, \"y\": 1},\n      \"type\": \"gauge\",\n      \"title\":
+    \"\U0001F4BB CPU使用率\",\n      \"targets\": [\n        {\n          \"expr\": \"process_cpu_usage{application=\\\"camel-observability-demo\\\"}
+    * 100\",\n          \"legendFormat\": \"CPU Usage\",\n          \"refId\": \"A\"\n
+    \       }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"percent\",\n          \"min\": 0,\n          \"max\": 100,\n          \"thresholds\":
+    {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\"color\":
+    \"green\", \"value\": null},\n              {\"color\": \"yellow\", \"value\":
+    50},\n              {\"color\": \"orange\", \"value\": 70},\n              {\"color\":
+    \"red\", \"value\": 85}\n            ]\n          }\n        }\n      },\n      \"options\":
+    {\n        \"showThresholdLabels\": true,\n        \"showThresholdMarkers\": true\n
+    \     }\n    },\n    {\n      \"id\": 4,\n      \"gridPos\": {\"h\": 6, \"w\":
+    6, \"x\": 12, \"y\": 1},\n      \"type\": \"gauge\",\n      \"title\": \"\U0001F9E0
+    ヒープメモリ使用率\",\n      \"targets\": [\n        {\n          \"expr\": \"(jvm_memory_used_bytes{application=\\\"camel-observability-demo\\\",area=\\\"heap\\\"}
+    / jvm_memory_max_bytes{application=\\\"camel-observability-demo\\\",area=\\\"heap\\\"})
+    * 100\",\n          \"legendFormat\": \"Heap Usage\",\n          \"refId\": \"A\"\n
+    \       }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"percent\",\n          \"min\": 0,\n          \"max\": 100,\n          \"thresholds\":
+    {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\"color\":
+    \"green\", \"value\": null},\n              {\"color\": \"yellow\", \"value\":
+    60},\n              {\"color\": \"orange\", \"value\": 80},\n              {\"color\":
+    \"red\", \"value\": 90}\n            ]\n          }\n        }\n      },\n      \"options\":
+    {\n        \"showThresholdLabels\": true,\n        \"showThresholdMarkers\": true\n
+    \     }\n    },\n    {\n      \"id\": 5,\n      \"gridPos\": {\"h\": 6, \"w\":
+    6, \"x\": 18, \"y\": 1},\n      \"type\": \"stat\",\n      \"title\": \"\U0001F9F5
+    アクティブスレッド数\",\n      \"targets\": [\n        {\n          \"expr\": \"jvm_threads_live_threads{application=\\\"camel-observability-demo\\\"}\",\n
+    \         \"legendFormat\": \"Live Threads\",\n          \"refId\": \"A\"\n        }\n
+    \     ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"short\",\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n
+    \           \"steps\": [\n              {\"color\": \"green\", \"value\": null},\n
+    \             {\"color\": \"yellow\", \"value\": 50},\n              {\"color\":
+    \"orange\", \"value\": 80},\n              {\"color\": \"red\", \"value\": 100}\n
+    \           ]\n          }\n        }\n      },\n      \"options\": {\n        \"graphMode\":
+    \"area\",\n        \"colorMode\": \"value\"\n      }\n    },\n    {\n      \"id\":
+    10,\n      \"gridPos\": {\"h\": 1, \"w\": 24, \"x\": 0, \"y\": 7},\n      \"type\":
+    \"row\",\n      \"title\": \"\U0001F42B Camel ルート パフォーマンス\",\n      \"collapsed\":
+    false\n    },\n    {\n      \"id\": 11,\n      \"gridPos\": {\"h\": 8, \"w\":
+    8, \"x\": 0, \"y\": 8},\n      \"type\": \"timeseries\",\n      \"title\": \"\U0001F4E8
+    メッセージ処理レート\",\n      \"targets\": [\n        {\n          \"expr\": \"rate(camel_exchanges_total{application=\\\"camel-observability-demo\\\"}[1m])\",\n
+    \         \"legendFormat\": \"{{routeId}} - Total\",\n          \"refId\": \"A\"\n
+    \       },\n        {\n          \"expr\": \"rate(camel_exchanges_succeeded_total{application=\\\"camel-observability-demo\\\"}[1m])\",\n
+    \         \"legendFormat\": \"{{routeId}} - Success\",\n          \"refId\": \"B\"\n
+    \       },\n        {\n          \"expr\": \"rate(camel_exchanges_failed_total{application=\\\"camel-observability-demo\\\"}[1m])\",\n
+    \         \"legendFormat\": \"{{routeId}} - Failed\",\n          \"refId\": \"C\"\n
+    \       }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"ops\",\n          \"custom\": {\n            \"drawStyle\": \"line\",\n            \"lineInterpolation\":
+    \"smooth\",\n            \"fillOpacity\": 10\n          }\n        },\n        \"overrides\":
+    [\n          {\n            \"matcher\": {\"id\": \"byRegexp\", \"options\": \".*Failed.*\"},\n
+    \           \"properties\": [\n              {\"id\": \"color\", \"value\": {\"mode\":
+    \"fixed\", \"fixedColor\": \"red\"}}\n            ]\n          },\n          {\n
+    \           \"matcher\": {\"id\": \"byRegexp\", \"options\": \".*Success.*\"},\n
+    \           \"properties\": [\n              {\"id\": \"color\", \"value\": {\"mode\":
+    \"fixed\", \"fixedColor\": \"green\"}}\n            ]\n          }\n        ]\n
+    \     },\n      \"options\": {\n        \"legend\": {\n          \"displayMode\":
+    \"table\",\n          \"placement\": \"bottom\",\n          \"calcs\": [\"last\",
+    \"mean\", \"max\"]\n        },\n        \"tooltip\": {\n          \"mode\": \"multi\"\n
+    \       }\n      }\n    },\n    {\n      \"id\": 12,\n      \"gridPos\": {\"h\":
+    8, \"w\": 8, \"x\": 8, \"y\": 8},\n      \"type\": \"timeseries\",\n      \"title\":
+    \"❌ エラー率\",\n      \"targets\": [\n        {\n          \"expr\": \"(rate(camel_exchanges_failed_total{application=\\\"camel-observability-demo\\\"}[1m])
+    / rate(camel_exchanges_total{application=\\\"camel-observability-demo\\\"}[1m]))
+    * 100\",\n          \"legendFormat\": \"{{routeId}} - Error Rate\",\n          \"refId\":
+    \"A\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n
+    \         \"unit\": \"percent\",\n          \"min\": 0,\n          \"max\": 100,\n
+    \         \"custom\": {\n            \"drawStyle\": \"line\",\n            \"lineInterpolation\":
+    \"smooth\",\n            \"fillOpacity\": 20\n          },\n          \"thresholds\":
+    {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\"color\":
+    \"green\", \"value\": null},\n              {\"color\": \"yellow\", \"value\":
+    1},\n              {\"color\": \"orange\", \"value\": 5},\n              {\"color\":
+    \"red\", \"value\": 10}\n            ]\n          }\n        }\n      },\n      \"options\":
+    {\n        \"legend\": {\n          \"displayMode\": \"table\",\n          \"placement\":
+    \"bottom\",\n          \"calcs\": [\"last\", \"mean\", \"max\"]\n        }\n      }\n
+    \   },\n    {\n      \"id\": 13,\n      \"gridPos\": {\"h\": 8, \"w\": 8, \"x\":
+    16, \"y\": 8},\n      \"type\": \"timeseries\",\n      \"title\": \"⏱️ 平均処理時間\",\n
+    \     \"targets\": [\n        {\n          \"expr\": \"rate(camel_route_policy_seconds_sum{application=\\\"camel-observability-demo\\\"}[1m])
+    / rate(camel_route_policy_seconds_count{application=\\\"camel-observability-demo\\\"}[1m])\",\n
+    \         \"legendFormat\": \"{{routeId}} - Avg Time\",\n          \"refId\":
+    \"A\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n
+    \         \"unit\": \"s\",\n          \"custom\": {\n            \"drawStyle\":
+    \"line\",\n            \"lineInterpolation\": \"smooth\",\n            \"fillOpacity\":
+    10\n          }\n        }\n      },\n      \"options\": {\n        \"legend\":
+    {\n          \"displayMode\": \"table\",\n          \"placement\": \"bottom\",\n
+    \         \"calcs\": [\"last\", \"mean\", \"max\"]\n        }\n      }\n    },\n
+    \   {\n      \"id\": 14,\n      \"gridPos\": {\"h\": 8, \"w\": 12, \"x\": 0, \"y\":
+    16},\n      \"type\": \"timeseries\",\n      \"title\": \"\U0001F4CA 処理中メッセージ数（Inflight）\",\n
+    \     \"targets\": [\n        {\n          \"expr\": \"camel_exchanges_inflight{application=\\\"camel-observability-demo\\\"}\",\n
+    \         \"legendFormat\": \"{{routeId}} - Inflight\",\n          \"refId\":
+    \"A\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n
+    \         \"unit\": \"short\",\n          \"custom\": {\n            \"drawStyle\":
+    \"line\",\n            \"lineInterpolation\": \"smooth\",\n            \"fillOpacity\":
+    20\n          },\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n
+    \           \"steps\": [\n              {\"color\": \"green\", \"value\": null},\n
+    \             {\"color\": \"yellow\", \"value\": 50},\n              {\"color\":
+    \"orange\", \"value\": 100},\n              {\"color\": \"red\", \"value\": 200}\n
+    \           ]\n          }\n        }\n      },\n      \"options\": {\n        \"legend\":
+    {\n          \"displayMode\": \"table\",\n          \"placement\": \"bottom\",\n
+    \         \"calcs\": [\"last\", \"mean\", \"max\"]\n        }\n      }\n    },\n
+    \   {\n      \"id\": 15,\n      \"gridPos\": {\"h\": 8, \"w\": 12, \"x\": 12,
+    \"y\": 16},\n      \"type\": \"stat\",\n      \"title\": \"\U0001F6A6 実行中ルート数\",\n
+    \     \"targets\": [\n        {\n          \"expr\": \"camel_routes_running_routes{application=\\\"camel-observability-demo\\\"}\",\n
+    \         \"legendFormat\": \"Running Routes\",\n          \"refId\": \"A\"\n
+    \       }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"short\",\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n
+    \           \"steps\": [\n              {\"color\": \"green\", \"value\": null}\n
+    \           ]\n          }\n        }\n      },\n      \"options\": {\n        \"graphMode\":
+    \"area\",\n        \"colorMode\": \"value\",\n        \"textMode\": \"value_and_name\"\n
+    \     }\n    },\n    {\n      \"id\": 30,\n      \"gridPos\": {\"h\": 1, \"w\":
+    24, \"x\": 0, \"y\": 24},\n      \"type\": \"row\",\n      \"title\": \"\U0001F310
+    HTTP エンドポイント\",\n      \"collapsed\": false\n    },\n    {\n      \"id\": 31,\n
+    \     \"gridPos\": {\"h\": 8, \"w\": 12, \"x\": 0, \"y\": 25},\n      \"type\":
+    \"timeseries\",\n      \"title\": \"\U0001F4E1 HTTPリクエストレート（エンドポイント別）\",\n      \"targets\":
+    [\n        {\n          \"expr\": \"sum by (uri) (rate(http_server_requests_seconds_count{application=\\\"camel-observability-demo\\\"}[1m]))\",\n
+    \         \"legendFormat\": \"{{uri}}\",\n          \"refId\": \"A\"\n        }\n
+    \     ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"reqps\",\n          \"custom\": {\n            \"drawStyle\": \"line\",\n            \"lineInterpolation\":
+    \"smooth\",\n            \"fillOpacity\": 10,\n            \"stacking\": {\n              \"mode\":
+    \"normal\"\n            }\n          }\n        }\n      },\n      \"options\":
+    {\n        \"legend\": {\n          \"displayMode\": \"table\",\n          \"placement\":
+    \"right\",\n          \"calcs\": [\"last\", \"mean\", \"max\"]\n        }\n      }\n
+    \   },\n    {\n      \"id\": 32,\n      \"gridPos\": {\"h\": 8, \"w\": 12, \"x\":
+    12, \"y\": 25},\n      \"type\": \"timeseries\",\n      \"title\": \"⏰ HTTPレスポンスタイム\",\n
+    \     \"targets\": [\n        {\n          \"expr\": \"rate(http_server_requests_seconds_sum{application=\\\"camel-observability-demo\\\"}[1m])
+    / rate(http_server_requests_seconds_count{application=\\\"camel-observability-demo\\\"}[1m])\",\n
+    \         \"legendFormat\": \"{{uri}} - Avg\",\n          \"refId\": \"A\"\n        },\n
+    \       {\n          \"expr\": \"http_server_requests_seconds_max{application=\\\"camel-observability-demo\\\"}\",\n
+    \         \"legendFormat\": \"{{uri}} - Max\",\n          \"refId\": \"B\"\n        }\n
+    \     ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"s\",\n          \"custom\": {\n            \"drawStyle\": \"line\",\n            \"lineInterpolation\":
+    \"smooth\",\n            \"fillOpacity\": 10\n          }\n        }\n      },\n
+    \     \"options\": {\n        \"legend\": {\n          \"displayMode\": \"table\",\n
+    \         \"placement\": \"right\",\n          \"calcs\": [\"last\", \"mean\",
+    \"max\"]\n        }\n      }\n    },\n    {\n      \"id\": 33,\n      \"gridPos\":
+    {\"h\": 8, \"w\": 24, \"x\": 0, \"y\": 33},\n      \"type\": \"timeseries\",\n
+    \     \"title\": \"\U0001F6A8 HTTPステータスコード別レート\",\n      \"targets\": [\n        {\n
+    \         \"expr\": \"sum by (status) (rate(http_server_requests_seconds_count{application=\\\"camel-observability-demo\\\"}[1m]))\",\n
+    \         \"legendFormat\": \"Status {{status}}\",\n          \"refId\": \"A\"\n
+    \       }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"reqps\",\n          \"custom\": {\n            \"drawStyle\": \"line\",\n            \"lineInterpolation\":
+    \"smooth\",\n            \"fillOpacity\": 10,\n            \"stacking\": {\n              \"mode\":
+    \"normal\"\n            }\n          }\n        },\n        \"overrides\": [\n
+    \         {\n            \"matcher\": {\"id\": \"byRegexp\", \"options\": \".*5.*\"},\n
+    \           \"properties\": [\n              {\"id\": \"color\", \"value\": {\"mode\":
+    \"fixed\", \"fixedColor\": \"red\"}}\n            ]\n          },\n          {\n
+    \           \"matcher\": {\"id\": \"byRegexp\", \"options\": \".*4.*\"},\n            \"properties\":
+    [\n              {\"id\": \"color\", \"value\": {\"mode\": \"fixed\", \"fixedColor\":
+    \"orange\"}}\n            ]\n          },\n          {\n            \"matcher\":
+    {\"id\": \"byRegexp\", \"options\": \".*2.*\"},\n            \"properties\": [\n
+    \             {\"id\": \"color\", \"value\": {\"mode\": \"fixed\", \"fixedColor\":
+    \"green\"}}\n            ]\n          }\n        ]\n      },\n      \"options\":
+    {\n        \"legend\": {\n          \"displayMode\": \"table\",\n          \"placement\":
+    \"right\",\n          \"calcs\": [\"last\", \"mean\", \"max\"]\n        }\n      }\n
+    \   },\n    {\n      \"id\": 40,\n      \"gridPos\": {\"h\": 1, \"w\": 24, \"x\":
+    0, \"y\": 41},\n      \"type\": \"row\",\n      \"title\": \"\U0001F9E0 JVM メモリ詳細\",\n
+    \     \"collapsed\": false\n    },\n    {\n      \"id\": 41,\n      \"gridPos\":
+    {\"h\": 8, \"w\": 12, \"x\": 0, \"y\": 42},\n      \"type\": \"timeseries\",\n
+    \     \"title\": \"\U0001F4BE ヒープメモリ使用量推移\",\n      \"targets\": [\n        {\n
+    \         \"expr\": \"jvm_memory_used_bytes{application=\\\"camel-observability-demo\\\",area=\\\"heap\\\"}\",\n
+    \         \"legendFormat\": \"Used - {{id}}\",\n          \"refId\": \"A\"\n        },\n
+    \       {\n          \"expr\": \"jvm_memory_committed_bytes{application=\\\"camel-observability-demo\\\",area=\\\"heap\\\"}\",\n
+    \         \"legendFormat\": \"Committed - {{id}}\",\n          \"refId\": \"B\"\n
+    \       },\n        {\n          \"expr\": \"jvm_memory_max_bytes{application=\\\"camel-observability-demo\\\",area=\\\"heap\\\"}\",\n
+    \         \"legendFormat\": \"Max - {{id}}\",\n          \"refId\": \"C\"\n        }\n
+    \     ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"bytes\",\n          \"custom\": {\n            \"drawStyle\": \"line\",\n            \"lineInterpolation\":
+    \"smooth\",\n            \"fillOpacity\": 10\n          }\n        }\n      },\n
+    \     \"options\": {\n        \"legend\": {\n          \"displayMode\": \"table\",\n
+    \         \"placement\": \"right\",\n          \"calcs\": [\"last\", \"mean\",
+    \"max\"]\n        }\n      }\n    },\n    {\n      \"id\": 42,\n      \"gridPos\":
+    {\"h\": 8, \"w\": 12, \"x\": 12, \"y\": 42},\n      \"type\": \"timeseries\",\n
+    \     \"title\": \"\U0001F5D1️ ガベージコレクション\",\n      \"targets\": [\n        {\n
+    \         \"expr\": \"rate(jvm_gc_pause_seconds_count{application=\\\"camel-observability-demo\\\"}[1m])
+    * 60\",\n          \"legendFormat\": \"{{action}} - {{cause}} (count/min)\",\n
+    \         \"refId\": \"A\"\n        },\n        {\n          \"expr\": \"rate(jvm_gc_pause_seconds_sum{application=\\\"camel-observability-demo\\\"}[1m])
+    / rate(jvm_gc_pause_seconds_count{application=\\\"camel-observability-demo\\\"}[1m])\",\n
+    \         \"legendFormat\": \"{{action}} - Avg Time (s)\",\n          \"refId\":
+    \"B\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n
+    \         \"unit\": \"short\",\n          \"custom\": {\n            \"drawStyle\":
+    \"line\",\n            \"lineInterpolation\": \"smooth\",\n            \"fillOpacity\":
+    10\n          }\n        }\n      },\n      \"options\": {\n        \"legend\":
+    {\n          \"displayMode\": \"table\",\n          \"placement\": \"right\",\n
+    \         \"calcs\": [\"last\", \"mean\", \"max\"]\n        }\n      }\n    },\n
+    \   {\n      \"id\": 43,\n      \"gridPos\": {\"h\": 8, \"w\": 12, \"x\": 0, \"y\":
+    50},\n      \"type\": \"timeseries\",\n      \"title\": \"\U0001F4E6 メモリ割り当てレート\",\n
+    \     \"targets\": [\n        {\n          \"expr\": \"rate(jvm_gc_memory_allocated_bytes_total{application=\\\"camel-observability-demo\\\"}[1m])\",\n
+    \         \"legendFormat\": \"Allocated Rate\",\n          \"refId\": \"A\"\n
+    \       },\n        {\n          \"expr\": \"rate(jvm_gc_memory_promoted_bytes_total{application=\\\"camel-observability-demo\\\"}[1m])\",\n
+    \         \"legendFormat\": \"Promoted Rate\",\n          \"refId\": \"B\"\n        }\n
+    \     ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"Bps\",\n          \"custom\": {\n            \"drawStyle\": \"line\",\n            \"lineInterpolation\":
+    \"smooth\",\n            \"fillOpacity\": 10\n          }\n        }\n      },\n
+    \     \"options\": {\n        \"legend\": {\n          \"displayMode\": \"table\",\n
+    \         \"placement\": \"bottom\",\n          \"calcs\": [\"last\", \"mean\",
+    \"max\"]\n        }\n      }\n    },\n    {\n      \"id\": 44,\n      \"gridPos\":
+    {\"h\": 8, \"w\": 12, \"x\": 12, \"y\": 50},\n      \"type\": \"gauge\",\n      \"title\":
+    \"⚠️ GCオーバーヘッド率\",\n      \"targets\": [\n        {\n          \"expr\": \"jvm_gc_overhead_percent{application=\\\"camel-observability-demo\\\"}\",\n
+    \         \"legendFormat\": \"GC Overhead\",\n          \"refId\": \"A\"\n        }\n
+    \     ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"percent\",\n          \"min\": 0,\n          \"max\": 100,\n          \"thresholds\":
+    {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\"color\":
+    \"green\", \"value\": null},\n              {\"color\": \"yellow\", \"value\":
+    5},\n              {\"color\": \"orange\", \"value\": 10},\n              {\"color\":
+    \"red\", \"value\": 20}\n            ]\n          }\n        }\n      },\n      \"options\":
+    {\n        \"showThresholdLabels\": true,\n        \"showThresholdMarkers\": true\n
+    \     }\n    },\n    {\n      \"id\": 50,\n      \"gridPos\": {\"h\": 1, \"w\":
+    24, \"x\": 0, \"y\": 58},\n      \"type\": \"row\",\n      \"title\": \"\U0001F4CA
+    メッセージフロー全体\",\n      \"collapsed\": false\n    },\n    {\n      \"id\": 51,\n
+    \     \"gridPos\": {\"h\": 10, \"w\": 24, \"x\": 0, \"y\": 59},\n      \"type\":
+    \"timeseries\",\n      \"title\": \"\U0001F504 エンドツーエンド メッセージフロー\",\n      \"description\":
+    \"HTTP → Camel → Kafka → Camel処理の全体的な流れ\",\n      \"targets\": [\n        {\n
+    \         \"expr\": \"rate(http_server_requests_seconds_count{application=\\\"camel-observability-demo\\\",uri=\\\"/camel/api/orders\\\"}[1m])\",\n
+    \         \"legendFormat\": \"1. HTTP POST /api/orders\",\n          \"refId\":
+    \"A\"\n        },\n        {\n          \"expr\": \"rate(camel_exchanges_total{application=\\\"camel-observability-demo\\\",routeId=\\\"order-producer-route\\\"}[1m])\",\n
+    \         \"legendFormat\": \"2. Camel Producer → Kafka\",\n          \"refId\":
+    \"B\"\n        },\n        {\n          \"expr\": \"rate(camel_exchanges_total{application=\\\"camel-observability-demo\\\",routeId=\\\"order-consumer-route\\\"}[1m])\",\n
+    \         \"legendFormat\": \"3. Kafka → Camel Consumer\",\n          \"refId\":
+    \"C\"\n        },\n        {\n          \"expr\": \"rate(camel_exchanges_succeeded_total{application=\\\"camel-observability-demo\\\",routeId=\\\"order-consumer-route\\\"}[1m])\",\n
+    \         \"legendFormat\": \"4. Processing Success\",\n          \"refId\": \"D\"\n
+    \       },\n        {\n          \"expr\": \"rate(camel_exchanges_failed_total{application=\\\"camel-observability-demo\\\",routeId=\\\"order-consumer-route\\\"}[1m])\",\n
+    \         \"legendFormat\": \"5. Processing Failed\",\n          \"refId\": \"E\"\n
+    \       }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":
+    \"ops\",\n          \"custom\": {\n            \"drawStyle\": \"line\",\n            \"lineInterpolation\":
+    \"smooth\",\n            \"lineWidth\": 2,\n            \"fillOpacity\": 15\n
+    \         }\n        },\n        \"overrides\": [\n          {\n            \"matcher\":
+    {\"id\": \"byName\", \"options\": \"1. HTTP POST /api/orders\"},\n            \"properties\":
+    [\n              {\"id\": \"color\", \"value\": {\"mode\": \"fixed\", \"fixedColor\":
+    \"blue\"}}\n            ]\n          },\n          {\n            \"matcher\":
+    {\"id\": \"byName\", \"options\": \"4. Processing Success\"},\n            \"properties\":
+    [\n              {\"id\": \"color\", \"value\": {\"mode\": \"fixed\", \"fixedColor\":
+    \"green\"}}\n            ]\n          },\n          {\n            \"matcher\":
+    {\"id\": \"byName\", \"options\": \"5. Processing Failed\"},\n            \"properties\":
+    [\n              {\"id\": \"color\", \"value\": {\"mode\": \"fixed\", \"fixedColor\":
+    \"red\"}}\n            ]\n          }\n        ]\n      },\n      \"options\":
+    {\n        \"legend\": {\n          \"displayMode\": \"table\",\n          \"placement\":
+    \"bottom\",\n          \"calcs\": [\"last\", \"mean\", \"max\", \"sum\"]\n        },\n
+    \       \"tooltip\": {\n          \"mode\": \"multi\",\n          \"sort\": \"none\"\n
+    \       }\n      }\n    }\n  ]\n}\n\n"
+  camel-dashboard.json: |
+    {
+      "id": null,
+      "uid": "camel-observability",
+      "title": "Camel Observability Dashboard",
+      "tags": ["camel", "observability"],
+      "timezone": "browser",
+      "schemaVersion": 16,
+      "version": 0,
+      "refresh": "5s",
+      "panels": [
+        {
+          "id": 1,
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+          "type": "timeseries",
+          "title": "JVM Memory Usage",
+          "targets": [
+            {
+              "expr": "jvm_memory_used_bytes{application=\"camel-observability-demo\"}",
+              "legendFormat": "{{area}} - {{id}}",
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes"
+            }
+          }
+        },
+        {
+          "id": 2,
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+          "type": "timeseries",
+          "title": "HTTP Request Rate",
+          "targets": [
+            {
+              "expr": "rate(http_server_requests_seconds_count{application=\"camel-observability-demo\"}[1m])",
+              "legendFormat": "{{uri}} - {{status}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps"
+            }
+          }
+        },
+        {
+          "id": 3,
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+          "type": "stat",
+          "title": "Application Uptime",
+          "targets": [
+            {
+              "expr": "process_uptime_seconds{application=\"camel-observability-demo\"}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "green", "value": null}
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 4,
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+          "type": "stat",
+          "title": "JVM Threads",
+          "targets": [
+            {
+              "expr": "jvm_threads_live_threads{application=\"camel-observability-demo\"}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 50},
+                  {"color": "red", "value": 100}
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: grafana-dashboards
+

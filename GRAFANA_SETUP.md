@@ -194,3 +194,4 @@ process_files_open_files{application="camel-observability-demo"}
 - [Micrometer Metrics](https://micrometer.io/docs/concepts)
 
 
+

@@ -122,3 +122,4 @@ echo "Grafana: https://${GRAFANA_URL}"
 **オブザーバビリティを体験してください！** 🎉
 
 
+

@@ -545,3 +545,4 @@ oc scale deployment/<DEPLOYMENT_NAME> --replicas=3
 **テストを楽しんでください！** 🎉
 
 
+

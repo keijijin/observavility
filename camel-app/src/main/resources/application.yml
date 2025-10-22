@@ -14,6 +14,13 @@ spring:
 
 server:
   port: 8080
+  # Undertow 設定
+  undertow:
+    threads:
+      io: 4                    # I/Oスレッド数（通常はCPUコア数）
+      worker: 200              # ワーカースレッド数（最大）
+    buffer-size: 1024          # バッファサイズ（バイト）
+    direct-buffers: true       # ダイレクトバッファを使用
 
 # Camel設定
 camel:
@@ -54,6 +61,17 @@ management:
         enabled: true
     tags:
       application: ${spring.application.name}
+    # メトリクスを有効化
+    enable:
+      undertow: true
+      kafka.consumer: true
+      kafka.producer: true
+    # Kafka統計情報の有効化
+    kafka:
+      consumer:
+        enabled: true
+      producer:
+        enabled: true
   # Spring Boot 3.x Tracing設定
   tracing:
     sampling:
@@ -81,4 +99,8 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] - %msg%n"
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+  # ログファイル出力先（環境変数LOG_PATHで上書き可能）
+  file:
+    path: ${LOG_PATH:./logs}
+    name: ${LOG_PATH:./logs}/application.log
 

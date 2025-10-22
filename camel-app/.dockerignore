@@ -1,5 +1,5 @@
-# Maven
-target/
+# Maven (but keep the JAR file for prebuilt Dockerfile)
+target/*
 !target/camel-observability-demo-1.0.0.jar
 pom.xml.tag
 pom.xml.releaseBackup
@@ -25,8 +25,11 @@ buildNumber.properties
 .DS_Store
 Thumbs.db
 
-# Logs
+# Logs (IMPORTANT: These can be very large)
 *.log
+logs/
+app.log
+*.log.*
 
 # Temporary files
 *.tmp
@@ -34,7 +37,11 @@ Thumbs.db
 *.swp
 *~
 
-logs/
-app.log
-*.log
+# Test scripts
+*.sh
+
+# Git
+.git/
+.gitignore
+.gitattributes
 

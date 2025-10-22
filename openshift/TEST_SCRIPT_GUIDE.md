@@ -406,3 +406,4 @@ oc rollout status deployment/camel-app
 お疲れ様でした！ 🎉
 
 
+

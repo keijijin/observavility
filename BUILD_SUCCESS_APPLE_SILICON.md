@@ -369,3 +369,4 @@ podman build --progress=plain -t camel-observability-demo:1.0.0 .
 **これでApple Siliconで完璧にビルドできます！** 🎉
 
 
+

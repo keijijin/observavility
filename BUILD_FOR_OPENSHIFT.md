@@ -328,3 +328,4 @@ oc get nodes -o jsonpath='{.items[*].status.nodeInfo.architecture}'
 **重要**: OpenShiftへのデプロイには**S2Iビルド**を強く推奨します！ 🎯
 
 
+

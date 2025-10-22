@@ -275,3 +275,4 @@ curl -k "https://${CAMEL_URL}/actuator/prometheus"
 **OpenShiftへのデプロイ完了！オブザーバビリティを体験してください！** 🎉
 
 
+

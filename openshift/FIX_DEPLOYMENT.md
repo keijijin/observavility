@@ -387,3 +387,4 @@ bash /tmp/fix_camel_app.sh
 **問題を修正して、すべてのPodを正常稼働させましょう！** 🚀
 
 
+

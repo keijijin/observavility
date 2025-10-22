@@ -1,0 +1,20 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# アラートルールの読み込み
+rule_files:
+  - "alert_rules.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'camel-app'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.containers.internal:8080']
+    # Podman 4.0以降では host.containers.internal でホストマシンにアクセス可能
+    # 古いバージョンやLinuxの場合は localhost:8080 を試してください
+

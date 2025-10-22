@@ -86,3 +86,4 @@ echo "   oc delete project $CURRENT_PROJECT"
 echo ""
 
 
+

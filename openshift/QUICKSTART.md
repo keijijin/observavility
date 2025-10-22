@@ -2,6 +2,8 @@
 
 最速でOpenShift上にデモ環境をデプロイする手順です。
 
+**🔔 最新情報**: camel-appが**Undertow**に移行されました！詳細は [UNDERTOW_MIGRATION.md](./UNDERTOW_MIGRATION.md) を参照してください。
+
 ---
 
 ## ⚡ 3ステップでデプロイ
