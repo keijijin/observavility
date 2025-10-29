@@ -50,3 +50,4 @@ echo "   テキスト形式: $LOG_DIR/application.log"
 echo "   JSON形式:     $LOG_DIR/application.json"
 echo ""
 
+

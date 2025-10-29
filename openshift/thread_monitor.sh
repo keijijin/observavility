@@ -1,31 +1,50 @@
 #!/bin/bash
 
-# スレッド監視スクリプト（JVM + Executor + Tomcat/Undertow対応）
-# 使い方: 
-#   ./thread_monitor.sh [interval_seconds] [actuator_url]
-#   または環境変数で指定:
-#   ACTUATOR_URL=http://your-host:port/actuator/prometheus ./thread_monitor.sh
+# OpenShift版スレッド監視スクリプト（JVM + Executor + Tomcat/Undertow対応）
+# 使い方: ./thread_monitor.sh [interval_seconds]
 
 INTERVAL=${1:-5}
-ACTUATOR_URL=${2:-${ACTUATOR_URL:-http://localhost:8080/actuator/prometheus}}
 
-echo "=== JVM & Webサーバー スレッド監視 ==="
-echo "接続先: ${ACTUATOR_URL}"
+echo "=== JVM & Webサーバー スレッド監視 (OpenShift版) ==="
 echo "測定間隔: ${INTERVAL}秒"
 echo "Ctrl+C で終了"
 echo ""
 
+# OpenShiftのRouteからURLを取得
+echo "🔍 Camel App Routeを検索中..."
+CAMEL_ROUTE=$(oc get route camel-app -o jsonpath='{.spec.host}' 2>/dev/null)
+
+if [ -z "$CAMEL_ROUTE" ]; then
+    echo "❌ エラー: Camel App Routeが見つかりません"
+    echo ""
+    echo "確認方法:"
+    echo "  oc get route"
+    echo ""
+    echo "Routeが存在しない場合、以下のコマンドで作成してください:"
+    echo "  oc create route edge camel-app --service=camel-app --port=8080-tcp"
+    echo ""
+    echo "または、Serviceを直接公開:"
+    echo "  oc expose service camel-app --port=8080-tcp"
+    exit 1
+fi
+
+ACTUATOR_URL="https://${CAMEL_ROUTE}/actuator/prometheus"
+echo "✅ Route検出: ${CAMEL_ROUTE}"
+echo "📊 メトリクスURL: ${ACTUATOR_URL}"
+echo ""
+
 # アプリケーションが起動しているか確認
 check_app() {
-    if ! curl -s -o /dev/null -w "%{http_code}" "$ACTUATOR_URL" 2>/dev/null | grep -q "200"; then
-        echo "❌ エラー: アプリケーションにアクセスできません"
+    HTTP_CODE=$(curl -k -s -o /dev/null -w "%{http_code}" "$ACTUATOR_URL" 2>/dev/null)
+    if [ "$HTTP_CODE" != "200" ]; then
+        echo "❌ エラー: アプリケーションにアクセスできません (HTTP $HTTP_CODE)"
         echo ""
         echo "確認方法:"
-        echo "  curl http://localhost:8080/actuator/health"
+        echo "  curl -k https://${CAMEL_ROUTE}/actuator/health"
         echo ""
-        echo "起動方法:"
-        echo "  1. ローカル環境: podman-compose up -d"
-        echo "  2. スタンドアロン: mvn spring-boot:run"
+        echo "Podの状態を確認:"
+        echo "  oc get pods | grep camel-app"
+        echo "  oc logs deployment/camel-app --tail=50"
         exit 1
     fi
 }
@@ -33,7 +52,7 @@ check_app() {
 check_app
 
 # サーバータイプを検出（初回のみ）
-METRICS=$(curl -s "$ACTUATOR_URL")
+METRICS=$(curl -k -s "$ACTUATOR_URL")
 HAS_TOMCAT=$(echo "$METRICS" | grep -q "^tomcat_threads" && echo "true" || echo "false")
 HAS_UNDERTOW=$(echo "$METRICS" | grep -q "^undertow_" && echo "true" || echo "false")
 
@@ -54,9 +73,9 @@ while true; do
     TIMESTAMP=$(date '+%H:%M:%S')
     
     # メトリクスを1回だけ取得（効率化）
-    METRICS=$(curl -s "$ACTUATOR_URL")
+    METRICS=$(curl -k -s "$ACTUATOR_URL")
     
-    # JVMスレッドメトリクス（macOS互換）
+    # JVMスレッドメトリクス
     LIVE=$(echo "$METRICS" | grep "^jvm_threads_live_threads{" | awk '{print $NF}' | head -1)
     DAEMON=$(echo "$METRICS" | grep "^jvm_threads_daemon_threads{" | awk '{print $NF}' | head -1)
     PEAK=$(echo "$METRICS" | grep "^jvm_threads_peak_threads{" | awk '{print $NF}' | head -1)
@@ -149,3 +168,4 @@ while true; do
     
     sleep $INTERVAL
 done
+

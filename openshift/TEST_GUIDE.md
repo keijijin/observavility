@@ -546,3 +546,4 @@ oc scale deployment/<DEPLOYMENT_NAME> --replicas=3
 
 
 
+

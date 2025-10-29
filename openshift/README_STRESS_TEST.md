@@ -160,3 +160,4 @@ oc autoscale deployment/camel-app --min=2 --max=10 --cpu-percent=70
 
 
 
+

@@ -386,3 +386,4 @@ echo "{app=\"camel-observability-demo\"} | json | trace_id=\"$TRACE_ID\""
 
 
 
+

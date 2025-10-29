@@ -389,3 +389,4 @@ management:
 **対象**: OpenShift 4.x、Spring Boot 3.x、Apache Camel 4.x
 
 
+

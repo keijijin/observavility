@@ -262,3 +262,4 @@ cd /Users/kjin/mobills/observability/demo/openshift
 **現在の状態**: ConfigMap修正完了、イメージ問題が未解決
 
 
+

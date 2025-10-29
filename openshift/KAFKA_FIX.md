@@ -292,3 +292,4 @@ oc logs -f deployment/camel-app
 
 
 
+

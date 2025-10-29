@@ -304,3 +304,4 @@ kafka_consumer_coordinator_heartbeat_rate{application="camel-observability-demo"
 **評価者**: AI Assistant
 **評価対象**: camel-comprehensive-dashboard.json (1,052行)
 
+

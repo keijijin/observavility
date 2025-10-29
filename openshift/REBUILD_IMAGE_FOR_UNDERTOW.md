@@ -245,3 +245,4 @@ oc get route grafana -o jsonpath='{.spec.host}'
 **対象**: OpenShift 4.x、Spring Boot 3.x with Undertow
 
 
+

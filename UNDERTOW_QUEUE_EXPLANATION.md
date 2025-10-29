@@ -301,3 +301,4 @@ rate(camel_exchanges_total{application="camel-observability-demo"}[1m])
 **結論**: キューサイズ=0は正常かつ理想的な状態 ✅
 
 
+

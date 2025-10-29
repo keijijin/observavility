@@ -331,3 +331,4 @@ oc set volume bc/camel-app --add --type=persistentVolumeClaim \
 
 
 
+

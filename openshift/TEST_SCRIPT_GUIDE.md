@@ -407,3 +407,4 @@ oc rollout status deployment/camel-app
 
 
 
+

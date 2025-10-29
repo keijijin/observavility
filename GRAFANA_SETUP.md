@@ -195,3 +195,4 @@ process_files_open_files{application="camel-observability-demo"}
 
 
 
+

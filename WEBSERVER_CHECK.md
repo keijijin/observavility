@@ -243,3 +243,4 @@ cd /Users/kjin/mobills/observability/demo
 **結論**: Tomcat使用中、thread_monitor.shは正常動作
 
 
+

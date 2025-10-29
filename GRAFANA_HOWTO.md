@@ -415,3 +415,4 @@ http_server_requests_seconds_count{application="camel-observability-demo"}
 
 
 
+

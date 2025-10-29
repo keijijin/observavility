@@ -276,3 +276,4 @@ curl -k "https://${CAMEL_URL}/actuator/prometheus"
 
 
 
+

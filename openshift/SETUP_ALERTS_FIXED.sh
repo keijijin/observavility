@@ -249,3 +249,4 @@ rm -f /tmp/prometheus.yml /tmp/prometheus.yml.bak /tmp/alert_rules.yml
 
 exit 0
 
+

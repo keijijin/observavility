@@ -253,3 +253,4 @@ Ctrl+C で終了
 **理由**: Camel REST DSLを使用しているため、Spring BootのHTTPメトリクスでURIが正しく記録されない
 
 
+

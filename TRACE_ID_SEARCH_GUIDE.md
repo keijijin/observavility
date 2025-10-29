@@ -479,3 +479,4 @@ sum by (trace_id) (count_over_time({app="camel-observability-demo"} | json | lev
 
 
 
+

@@ -382,3 +382,4 @@ oc delete pod -l app=prometheus
 **対象**: OpenShift 4.x、Spring Boot 3.x、Grafana 10.x
 
 
+

@@ -329,3 +329,4 @@ oc get nodes -o jsonpath='{.items[*].status.nodeInfo.architecture}'
 
 
 
+

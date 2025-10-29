@@ -370,3 +370,4 @@ podman build --progress=plain -t camel-observability-demo:1.0.0 .
 
 
 
+

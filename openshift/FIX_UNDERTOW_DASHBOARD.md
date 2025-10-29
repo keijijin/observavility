@@ -322,3 +322,4 @@ echo "Undertow Dashboard: https://$(oc get route grafana -o jsonpath='{.spec.hos
 **対象**: OpenShift 4.x
 
 
+

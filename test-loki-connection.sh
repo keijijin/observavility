@@ -166,3 +166,4 @@ echo "   - エラーログのみ: {app=\"camel-observability-demo\"} |= \"ERROR\
 echo "   - 特定のトレースID: {app=\"camel-observability-demo\"} | json | trace_id=\"YOUR_TRACE_ID\""
 echo ""
 
+
